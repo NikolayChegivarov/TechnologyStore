@@ -90,6 +90,7 @@ class Customer(models.Model):  # Покупатель
 
 
 class User(AbstractUser):  # Пользователь
+
     class Role(models.TextChoices):
         ADMIN = 'ADMIN', 'Admin'
         MANAGER = 'MANAGER', 'Manager'

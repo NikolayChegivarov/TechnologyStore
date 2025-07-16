@@ -8,12 +8,6 @@
             <p class="lead">Лучший выбор электроники и инструментов</p>
             
             {% if user.is_authenticated %}
-                <div class="mt-4">
-                    <a href="{% if user.role == 'MANAGER' %}{% url 'manager_dashboard' %}{% elif user.role == 'CUSTOMER' %}{% url 'customer_dashboard' %}{% else %}{% url 'admin:index' %}{% endif %}" 
-                       class="btn btn-primary btn-lg">
-                        Перейти в личный кабинет
-                    </a>
-                </div>
 
             {% else %}
                 <div class="mt-4">
