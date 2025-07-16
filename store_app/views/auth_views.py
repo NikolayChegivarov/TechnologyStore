@@ -1,0 +1,63 @@
+# Регистрация клиента, менеджера / авторизация.
+from django.shortcuts import render, redirect
+from django.contrib.auth import login
+from django.views.generic import CreateView
+from ..forms.auth_forms import LoginForm, CustomerSignUpForm, ManagerSignUpForm
+from ..models import User
+
+
+class CustomerSignUpView(CreateView):
+    """Обрабатывает регистрацию нового клиента:
+    - Отображает форму регистрации
+    - Создает нового пользователя с ролью клиента
+    - Автоматически авторизует пользователя после успешной регистрации
+    - Перенаправляет на dashboard клиента"""
+    form_class = CustomerSignUpForm
+    template_name = 'auth/signup.html'
+    success_url = '/customer/dashboard/'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)
+        return response
+
+
+class ManagerSignUpView(CreateView):
+    """Обрабатывает регистрацию нового менеджера:
+    - Отображает форму регистрации для менеджеров
+    - Создает нового пользователя с ролью менеджера
+    - Автоматически выполняет вход после успешной регистрации
+    - Перенаправляет на dashboard менеджера"""
+    form_class = ManagerSignUpForm
+    template_name = 'auth/signup.html'
+    success_url = '/manager/dashboard/'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        login(self.request, self.object)
+        return response
+
+
+def login_view(request):
+    """Обрабатывает вход пользователя и перенаправляет его
+    в зависимости от роли (админ, менеджер, клиент)"""
+    if request.user.is_authenticated:
+        if request.user.is_superuser:
+            return redirect('admin:index')
+        elif request.user.role == User.Role.MANAGER:
+            return redirect('manager_dashboard')
+        return redirect('customer_dashboard')
+
+    if request.method == 'POST':
+        form = LoginForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+            if user.is_superuser:
+                return redirect('admin:index')
+            elif user.role == User.Role.MANAGER:
+                return redirect('manager_dashboard')
+            return redirect('customer_dashboard')
+    else:
+        form = LoginForm()
+    return render(request, 'auth/login.html', {'form': form})
