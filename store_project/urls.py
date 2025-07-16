@@ -22,6 +22,7 @@ from django.views.generic import TemplateView
 from store_app.views.auth_views import login_view, CustomerSignUpView, ManagerSignUpView
 from store_app.views.cart_views import cart_view, add_to_cart
 from store_app.views.dashboard_views import customer_dashboard, manager_dashboard
+from store_app.views.favorite_views import favorites_view
 from store_app.views.product_views import product_list, product_detail
 
 
@@ -34,13 +35,18 @@ urlpatterns = [
     path('signup/manager/', ManagerSignUpView.as_view(), name='manager_signup'),  # Регистрация менеджера.
 
     # Dashboard URLs
+    # Неиспользуется
     path('customer/dashboard/', customer_dashboard, name='customer_dashboard'), # Отображает страницу покупателя.
+
     path('manager/dashboard/', manager_dashboard, name='manager_dashboard'),  # Отображает страницу менеджера.
 
     # Product URLs
     path('products/', product_list, name='product_list'), # Список продуктов
     path('products/<slug:category_slug>/', product_list, name='product_list_by_category'), # Список прод по категории.
     path('product/<int:id>/<slug:slug>/', product_detail, name='product_detail'),  # Детали продукта
+
+    # Favorites URLs
+    path('products/favorites/', favorites_view, name='favorites'),  # Избранные товары
 
     # Cart URLs
     path('cart/', cart_view, name='cart_view'),

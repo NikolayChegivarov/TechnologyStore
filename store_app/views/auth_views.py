@@ -4,6 +4,7 @@ from django.contrib.auth import login
 from django.views.generic import CreateView
 from ..forms.auth_forms import LoginForm, CustomerSignUpForm, ManagerSignUpForm
 from ..models import User
+from django.contrib import messages
 
 
 class CustomerSignUpView(CreateView):
@@ -39,17 +40,18 @@ class ManagerSignUpView(CreateView):
 
 
 def login_view(request):
-    """Обрабатывает вход пользователя и перенаправляет его
-    в зависимости от роли (админ, менеджер, клиент)"""
+    """Обрабатывает вход пользователя и перенаправляет его в зависимости от роли."""
     if request.user.is_authenticated:
         if request.user.is_superuser:
             return redirect('admin:index')
         elif request.user.role == User.Role.MANAGER:
             return redirect('manager_dashboard')
-        return redirect('customer_dashboard')
+        elif request.user.role == User.Role.CUSTOMER:
+            return redirect('customer_dashboard')
+        return redirect('home')
 
     if request.method == 'POST':
-        form = LoginForm(data=request.POST)
+        form = LoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
@@ -57,7 +59,12 @@ def login_view(request):
                 return redirect('admin:index')
             elif user.role == User.Role.MANAGER:
                 return redirect('manager_dashboard')
-            return redirect('customer_dashboard')
+            elif user.role == User.Role.CUSTOMER:
+                return redirect('customer_dashboard')
+            return redirect('home')
+        else:
+            messages.error(request, "Неверное имя пользователя или пароль.")
     else:
         form = LoginForm()
-    return render(request, 'auth/login.html', {'form': form})
+
+    return render(request, 'login.html', {'form': form})

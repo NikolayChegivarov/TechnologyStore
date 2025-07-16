@@ -16,8 +16,27 @@ class RoleMiddleware:
         return response
 
     def process_view(self, request, view_func, view_args, view_kwargs):
+        """
+        Обрабатывает входящий HTTP-запрос до вызова представления.
+
+        - Если пользователь неавторизован и пытается получить доступ к закрытой странице (не home, login или signup),
+          происходит перенаправление на страницу входа.
+        - Для авторизованных пользователей проверяется соответствие между URL и их ролью:
+            * Менеджер может заходить только на /manager/*
+            * Покупатель — только на /customer/*
+        - Суперпользователю разрешён доступ ко всем страницам.
+
+        Возвращает None (разрешение на выполнение представления) или редирект/ошибку 403.
+        """
         if not request.user.is_authenticated:
-            if request.path not in [reverse('login'), reverse('customer_signup'), reverse('manager_signup')]:
+            allowed_urls = [
+                reverse('home'),
+                reverse('login'),
+                reverse('signup'),
+                reverse('customer_signup'),
+                reverse('manager_signup'),
+            ]
+            if request.path not in allowed_urls:
                 return redirect('login')
             return None
 

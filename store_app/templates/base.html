@@ -79,26 +79,21 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                                 {% if user.role == 'CUSTOMER' %}
-                                    <i class="fas fa-user"></i> {{ user.customer_profile.get_full_name }}
+                                    <i class="fas fa-user"></i> {{ user.get_full_name|default:user.username }}
                                 {% elif user.role == 'MANAGER' %}
-                                    <i class="fas fa-user-tie"></i> {{ user.manager_profile.get_full_name }}
+                                    <i class="fas fa-user-tie"></i> {{ user.get_full_name|default:user.username }}
                                 {% else %}
-                                    <i class="fas fa-user-shield"></i> Администратор
+                                    <i class="fas fa-user-shield"></i> {{ user.username }}
                                 {% endif %}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end">
+                                {% comment %}
                                 {% if user.role == 'CUSTOMER' %}
                                     <li><a class="dropdown-item" href="{% url 'customer_profile' %}">
                                         <i class="fas fa-user-circle"></i> Профиль
                                     </a></li>
                                 {% endif %}
-                                <li><a class="dropdown-item" href="{% url 'order_history' %}">
-                                    <i class="fas fa-history"></i> История заказов
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{% url 'logout' %}">
-                                    <i class="fas fa-sign-out-alt"></i> Выйти
-                                </a></li>
+                                {% endcomment %}
                             </ul>
                         </li>
                     {% else %}
