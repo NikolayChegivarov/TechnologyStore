@@ -1,12 +1,25 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
 from enum import Enum
 
 
+phone_validator = RegexValidator(
+    regex=r'^\+?[0-9\s-]+$',
+    message='Номер телефона должен содержать только цифры, пробелы и знак +'
+)
+
 class Store(models.Model):  # Филиалы
     city = models.CharField(max_length=255, db_index=True)
-    address = models.CharField(max_length=255, db_index=True)
+    address = models.TextField(
+        blank=True,
+        verbose_name="Адрес",
+        validators=[RegexValidator(
+            regex=r'^[а-яА-ЯёЁ0-9\s.,-]+$',
+            message='Допустимы русские буквы, цифры, пробелы и знаки .,-'
+        )]
+    )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -37,11 +50,33 @@ class Category(models.Model):    # Категории
 
 
 class Manager(models.Model):  # Продавец
+    # Валидатор на русский
+    cyrillic_validator = RegexValidator(
+        regex=r'^[а-яА-ЯёЁ\\s-]+$',
+        message='Допустимы только русские буквы, пробелы и дефисы'
+    )
     store = models.ForeignKey(Store, on_delete=models.SET_NULL, null=True, related_name='managers')
-    last_name = models.CharField(max_length=100, verbose_name="Фамилия")
-    first_name = models.CharField(max_length=100, verbose_name="Имя")
-    middle_name = models.CharField(max_length=100, blank=True, verbose_name="Отчество")
-    phone = models.CharField(max_length=20, verbose_name="Телефон")
+    last_name = models.CharField(
+        max_length=100,
+        verbose_name="Фамилия",
+        validators=[cyrillic_validator]
+    )
+    first_name = models.CharField(
+        max_length=100,
+        verbose_name="Имя",
+        validators=[cyrillic_validator]
+    )
+    middle_name = models.CharField(
+        max_length=100,
+        blank=True,
+        verbose_name="Отчество",
+        validators=[cyrillic_validator]
+    )
+    phone = models.CharField(
+        max_length=20,
+        verbose_name="Телефон",
+        validators=[phone_validator]
+    )
     position = models.CharField(max_length=100, blank=True, verbose_name="Должность")
     is_active = models.BooleanField(default=True, verbose_name="Доступ разрешен")
     created_at = models.DateTimeField(default=timezone.now)
@@ -63,13 +98,51 @@ class Manager(models.Model):  # Продавец
 
 
 class Customer(models.Model):  # Покупатель
-    username = models.CharField(max_length=50, unique=True)
-    last_name = models.CharField(max_length=50, verbose_name="Фамилия")
-    first_name = models.CharField(max_length=50, verbose_name="Имя")
-    middle_name = models.CharField(max_length=50, blank=True, verbose_name="Отчество")
-    imail = models.CharField(max_length=50, verbose_name="Почта")
-    phone = models.CharField(max_length=20, blank=True, verbose_name="Телефон")
-    address = models.TextField(blank=True, verbose_name="Адрес")
+    # Общий валидатор для кириллицы, пробелов и дефисов
+    cyrillic_validator = RegexValidator(
+        regex=r'^[а-яА-ЯёЁ\s-]+$',
+        message='Допустимы только русские буквы, пробелы и дефисы.'
+    )
+    username = models.CharField(
+        max_length=50,
+        unique=True,
+        verbose_name="Логин",
+        help_text="Уникальный идентификатор пользователя (можно использовать латиницу)"
+    )
+    last_name = models.CharField(
+        max_length=50,
+        verbose_name="Фамилия",
+        validators=[cyrillic_validator]
+    )
+    first_name = models.CharField(
+        max_length=50,
+        verbose_name="Имя",
+        validators=[cyrillic_validator]
+    )
+    middle_name = models.CharField(
+        max_length=50,
+        blank=True,
+        verbose_name="Отчество",
+        validators=[cyrillic_validator]
+    )
+    email = models.EmailField(
+        max_length=50,
+        null=True,
+        verbose_name="Почта"
+    )
+    phone = models.CharField(
+        max_length=20,
+        verbose_name="Телефон",
+        validators=[phone_validator]
+    )
+    address = models.TextField(
+        blank=True,
+        verbose_name="Адрес",
+        validators=[RegexValidator(
+            regex='^[а-яА-ЯёЁ0-9\s.,-]+$',
+            message='Допустимы русские буквы, цифры, пробелы и знаки .,-'
+        )]
+    )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -90,6 +163,30 @@ class Customer(models.Model):  # Покупатель
 
 
 class User(AbstractUser):  # Пользователь
+    username = models.CharField(
+        max_length=150,
+        unique=True,
+        validators=[RegexValidator(
+            regex='^[а-яА-ЯёЁa-zA-Z0-9@.+-_]+$',
+            message='Логин может содержать русские/латинские буквы, цифры и @/./+/-/_'
+        )]
+    )
+    # Валидатор для кириллицы, пробелов и дефисов
+    cyrillic_validator = RegexValidator(
+        regex='^[а-яА-ЯёЁ\\s-]+$',
+        message='Допустимы только русские буквы, пробелы и дефисы'
+    )
+
+    first_name = models.CharField(
+        max_length=150,
+        verbose_name="Имя",
+        validators=[cyrillic_validator]
+    )
+    last_name = models.CharField(
+        max_length=150,
+        verbose_name="Фамилия",
+        validators=[cyrillic_validator]
+    )
 
     class Role(models.TextChoices):
         ADMIN = 'ADMIN', 'Admin'
@@ -152,6 +249,23 @@ class Product(models.Model):  # Продукт
         indexes = [
             models.Index(fields=['name', 'price']),
         ]
+
+class FavoriteProduct(models.Model):  # Избранные товары
+    user = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='favorite_products')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='favorited_by')
+    added_at = models.DateTimeField(default=timezone.now)
+
+    class Meta:
+        verbose_name = "Избранный товар"
+        verbose_name_plural = "Избранные товары"
+        ordering = ['-added_at']
+        unique_together = ('user', 'product')  # один и тот же товар нельзя добавить дважды
+        indexes = [
+            models.Index(fields=['user', 'product']),
+        ]
+
+    def __str__(self):
+        return f"{self.user} — {self.product}"
 
 
 class CartItem(models.Model):  # Корзина

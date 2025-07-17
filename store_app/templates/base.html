@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -31,6 +32,25 @@
             top: -5px;
             right: -5px;
             font-size: 12px;
+        }
+
+        /* Добавьте это в существующие стили в head */
+        body {
+            background-image: url('{% static "images/background.png" %}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            min-height: 100vh;
+        }
+
+        /* Добавьте полупрозрачный слой для лучшей читаемости контента */
+        main {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
         }
     </style>
 
