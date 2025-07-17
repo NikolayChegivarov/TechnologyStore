@@ -15,20 +15,26 @@ class LoginForm(AuthenticationForm):
 
 
 class CustomerSignUpForm(UserCreationForm):
-    email = forms.EmailField(required=True, label="Email")
-    first_name = forms.CharField(required=True, label="Имя")
-    last_name = forms.CharField(required=True, label="Фамилия")
+    email = forms.EmailField(
+        required=True,
+        label="Email",
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'Введите email'})
+    )
+    first_name = forms.CharField(
+        required=True,
+        label="Имя",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите имя'})
+    )
+    last_name = forms.CharField(
+        required=True,
+        label="Фамилия",
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Введите фамилию'})
+    )
 
     class Meta:
         model = User
         fields = ('email', 'first_name', 'last_name', 'password1', 'password2')
 
-    def save(self, commit=True):
-        user = super().save(commit=False)
-        user.role = User.Role.CUSTOMER
-        if commit:
-            user.save()
-        return user
 
 class ManagerSignUpForm(UserCreationForm):
     email = forms.EmailField(required=True, label="Email")

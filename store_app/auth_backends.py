@@ -4,6 +4,14 @@ from django.contrib.auth import get_user_model
 UserModel = get_user_model()
 
 class RoleBasedAuthBackend(ModelBackend):
+    """
+    Кастомный бэкенд аутентификации, который различает способы входа для разных ролей:
+
+    Для CUSTOMER - проверяет email и пароль
+
+    Для MANAGER/ADMIN - проверяет username и пароль
+    Если пользователь не найден или пароль неверный, возвращает None
+    """
     def authenticate(self, request, username=None, password=None, **kwargs):
         if username is None or password is None:
             return None

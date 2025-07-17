@@ -28,8 +28,8 @@ from store_app.views.product_views import product_list, product_detail
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
-    path('login/', login_view, name='login'),
-    path('logout/', LogoutView.as_view(), name='logout'),
+    path('login/', login_view, name='login'), # Вход пользователя.
+    # path('logout/', LogoutView.as_view(), name='logout'),
     path('signup/', CustomerSignUpView.as_view(), name='signup'),  # Сортирует пользователя, направляет на его стр.
     path('signup/customer/', CustomerSignUpView.as_view(), name='customer_signup'), # Регистрация покупателя.
     path('signup/manager/', ManagerSignUpView.as_view(), name='manager_signup'),  # Регистрация менеджера.
