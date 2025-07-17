@@ -148,3 +148,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Указывает Django использовать кастомную модель пользователя вместо стандартной
 # Необходимо для расширения функционала пользователей (добавление ролей и связей)
 AUTH_USER_MODEL = 'store_app.User'
+
+AUTHENTICATION_BACKENDS = [
+    'store_app.auth_backends.RoleBasedAuthBackend',
+]
