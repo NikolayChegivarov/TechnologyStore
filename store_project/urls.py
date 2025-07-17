@@ -34,6 +34,9 @@ urlpatterns = [
     path('signup/customer/', CustomerSignUpView.as_view(), name='customer_signup'), # Регистрация покупателя.
     path('signup/manager/', ManagerSignUpView.as_view(), name='manager_signup'),  # Регистрация менеджера.
 
+    # Политика конфиденциальности
+    path('privacy/', TemplateView.as_view(template_name='privacy.html'), name='privacy_policy'),
+
     # Dashboard URLs
     # Неиспользуется
     path('customer/dashboard/', customer_dashboard, name='customer_dashboard'), # Отображает страницу покупателя.

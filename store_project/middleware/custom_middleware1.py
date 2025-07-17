@@ -35,6 +35,7 @@ class RoleMiddleware:
                 reverse('signup'),
                 reverse('customer_signup'),
                 reverse('manager_signup'),
+                reverse('privacy_policy'),
             ]
             if request.path not in allowed_urls:
                 return redirect('login')

@@ -3,8 +3,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.views.generic import CreateView
 from ..forms.auth_forms import LoginForm, CustomerSignUpForm, ManagerSignUpForm
-from ..models import User
+from ..models import User, Customer
 from django.contrib import messages
+from uuid import uuid4
 
 
 class CustomerSignUpView(CreateView):
@@ -12,15 +13,31 @@ class CustomerSignUpView(CreateView):
     - Отображает форму регистрации
     - Создает нового пользователя с ролью клиента
     - Автоматически авторизует пользователя после успешной регистрации
-    - Перенаправляет на dashboard клиента"""
+    - Перенаправляет на домашнюю страницу"""
     form_class = CustomerSignUpForm
     template_name = 'auth/signup.html'
-    success_url = '/customer/dashboard/'
 
     def form_valid(self, form):
-        response = super().form_valid(form)
-        login(self.request, self.object)
-        return response
+        # Сохраняем объект User, но пока не коммитим
+        user = form.save(commit=False)
+        user.role = User.Role.CUSTOMER
+
+        # Создаём Customer-профиль
+        customer = Customer.objects.create(
+            username=f"user_{uuid4().hex[:8]}",  # временный логин, если username больше не нужен — уберите
+            first_name=user.first_name,
+            last_name=user.last_name,
+            email=user.email,
+            phone="",  # можно заменить на form.cleaned_data.get("phone") если есть
+        )
+
+        # Привязываем профиль
+        user.customer_profile = customer
+        user.save()
+
+        # Логиним и перенаправляем
+        login(self.request, user)
+        return redirect('home')  # name='home' — как указано в urlpatterns
 
 
 class ManagerSignUpView(CreateView):
