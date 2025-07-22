@@ -12,7 +12,6 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Кастомные стили -->
     <style>
         .navbar-brand {
             font-weight: bold;
@@ -33,8 +32,6 @@
             right: -5px;
             font-size: 12px;
         }
-
-        /* Добавьте это в существующие стили в head */
         body {
             background-image: url('{% static "images/background.png" %}');
             background-size: cover;
@@ -43,8 +40,6 @@
             background-repeat: no-repeat;
             min-height: 100vh;
         }
-
-        /* Добавьте полупрозрачный слой для лучшей читаемости контента */
         main {
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
@@ -57,7 +52,6 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <!-- Навигационная панель -->
     <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
@@ -98,9 +92,8 @@
                             </li>
                         {% endif %}
 
-                        <!-- Профиль пользователя -->
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {% if user.role == 'CUSTOMER' %}
                                     <i class="fas fa-user"></i> {{ user.get_full_name|default:user.username }}
                                 {% elif user.role == 'MANAGER' %}
@@ -109,18 +102,24 @@
                                     <i class="fas fa-user-shield"></i> {{ user.username }}
                                 {% endif %}
                             </a>
+                            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                                {% if user.role == 'CUSTOMER' %}
+                                    <li><a class="dropdown-item" href="{% url 'customer_dashboard' %}">
+                                        <i class="fas fa-user-circle"></i> Профиль
+                                    </a></li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger" style="border: none; background: none; padding: 0;">
+                                            <i class="fas fa-sign-out-alt"></i> Выйти
+                                        </button>
+                                    </form>
+                                </li>
+                            </ul>
                         </li>
-                        {% comment %}
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            {% if user.role == 'CUSTOMER' %}
-                                <li><a class="dropdown-item" href="{% url 'customer_profile' %}">
-                                    <i class="fas fa-user-circle"></i> Профиль
-                                </a></li>
-                            {% endif %}
-                        </ul>
-                        {% endcomment %}
                     {% else %}
-                        <!-- Кнопки входа/регистрации -->
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">
                                 <i class="fas fa-sign-in-alt"></i> Войти
@@ -137,9 +136,7 @@
         </div>
     </nav>
 
-    <!-- Основное содержимое -->
     <main class="container">
-        <!-- Системные сообщения -->
         {% if messages %}
         <div class="row">
             <div class="col-12">
@@ -153,11 +150,9 @@
         </div>
         {% endif %}
 
-        <!-- Блок контента -->
         {% block content %}{% endblock %}
     </main>
 
-    <!-- Подвал -->
     <footer class="footer">
         <div class="container">
             <div class="row">
@@ -187,12 +182,9 @@
         </div>
     </footer>
 
-    <!-- Bootstrap JS и зависимости -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Кастомные скрипты -->
     <script>
-        // Инициализация всплывающих подсказок
         document.addEventListener('DOMContentLoaded', function() {
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
