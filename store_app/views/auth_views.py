@@ -64,7 +64,7 @@ def login_view(request):
         elif request.user.role == User.Role.MANAGER:
             return redirect('manager_dashboard')
         elif request.user.role == User.Role.CUSTOMER:
-            return redirect('customer_dashboard')
+            return redirect('home')
         return redirect('home')
 
     if request.method == 'POST':
@@ -77,7 +77,7 @@ def login_view(request):
             elif user.role == User.Role.MANAGER:
                 return redirect('manager_dashboard')
             elif user.role == User.Role.CUSTOMER:
-                return redirect('customer_dashboard')
+                return redirect('home')
             return redirect('home')
         else:
             messages.error(request, "Неверное имя пользователя или пароль.")

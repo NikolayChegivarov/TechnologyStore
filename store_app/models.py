@@ -167,7 +167,7 @@ class User(AbstractUser):  # Пользователь
         max_length=150,
         unique=True,
         validators=[RegexValidator(
-            regex='^[а-яА-ЯёЁa-zA-Z0-9@.+-_]+$',
+            regex=r'^[а-яА-ЯёЁa-zA-Z0-9@.+\-_\s]+$',
             message='Логин может содержать русские/латинские буквы, цифры и @/./+/-/_'
         )]
     )
@@ -216,11 +216,13 @@ class User(AbstractUser):  # Пользователь
     )
 
     def save(self, *args, **kwargs):
-        if self.is_superuser:
-            self.role = User.Role.ADMIN
-        elif not self.pk:  # только при создании
-            self.role = self.role or User.Role.CUSTOMER
+        creating = not self.pk
         super().save(*args, **kwargs)
+
+        if self.role == User.Role.MANAGER and self.manager_profile:
+            self.manager_profile.first_name = self.first_name
+            self.manager_profile.last_name = self.last_name
+            self.manager_profile.save()
 
 
 class Product(models.Model):  # Продукт
