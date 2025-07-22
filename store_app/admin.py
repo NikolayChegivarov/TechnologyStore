@@ -1,11 +1,25 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Manager
+from .models import User, Manager, Store
 
 
-from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin
-from .models import User
+class StoreAdmin(admin.ModelAdmin):
+    list_display = ('city', 'address', 'created_at', 'updated_at')
+    search_fields = ('city', 'address')
+    list_filter = ('city', 'created_at')
+    ordering = ('city', 'address')
+
+    fieldsets = (
+        (None, {
+            'fields': ('city', 'address')
+        }),
+        ('Дополнительная информация', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+    readonly_fields = ('created_at', 'updated_at')
 
 class CustomUserAdmin(UserAdmin):
     """
@@ -78,4 +92,5 @@ class CustomUserAdmin(UserAdmin):
                 obj.manager_profile = manager
                 obj.save()
 
+admin.site.register(Store, StoreAdmin)
 admin.site.register(User, CustomUserAdmin)
