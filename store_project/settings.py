@@ -152,3 +152,6 @@ AUTH_USER_MODEL = 'store_app.User'
 AUTHENTICATION_BACKENDS = [
     'store_app.auth_backends.RoleBasedAuthBackend',
 ]
+
+MEDIA_URL = '/media/'  # URL-префикс для медиа-файлов
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Путь к папке media

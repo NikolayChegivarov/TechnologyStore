@@ -19,26 +19,13 @@ def create_product(request):
     Returns:
         HttpResponse: Ответ с формой или редирект для неавторизованных пользователей
     """
-    if not request.user.is_authenticated or request.user.role != 'MANAGER':
-        return redirect('login')
-
     if request.method == 'POST':
-        form = CreatProductForm(request.POST)
+        form = CreatProductForm(request.POST, request.FILES)  # Обрабатываем файлы
         if form.is_valid():
-            # Создаем объект продукта, но пока не сохраняем в БД
             product = form.save(commit=False)
-            # Устанавливаем создателя продукта
             product.created_by = request.user.manager_profile
-            # Теперь сохраняем в БД
             product.save()
-
-            # Подготавливаем контекст для отображения
-            context = {
-                'form': CreatProductForm(),  # Новая пустая форма
-                'success_message': f'Товар "{product.name}" успешно создан!',
-                'created_product': product  # Передаем созданный продукт
-            }
-            return render(request, 'create_product.html', context)
+            return redirect('product_detail', id=product.id, slug=product.slug)
     else:
         form = CreatProductForm()
 

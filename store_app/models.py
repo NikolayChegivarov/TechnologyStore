@@ -232,6 +232,17 @@ class Product(models.Model):  # Продукт
     price = models.DecimalField(max_digits=10, decimal_places=2)  # цена
     available = models.BooleanField(default=True)  # наличие
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')  # филиал
+    image = models.ImageField(
+        upload_to='products/',
+        verbose_name='Изображение товара',
+        blank=True,
+        null=True
+    )
+    external_url = models.URLField(
+        verbose_name='Ссылка на товар',
+        blank=True,
+        null=True
+    )
     created_by = models.ForeignKey(
         Manager,
         on_delete=models.PROTECT,

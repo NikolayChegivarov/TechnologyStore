@@ -15,6 +15,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
+from django.conf.urls.static import static
 from django.urls import path, include
 from django.contrib.auth.views import LogoutView
 from django.views.generic import TemplateView
@@ -24,6 +25,7 @@ from store_app.views.cart_views import cart_view, add_to_cart
 from store_app.views.dashboard_views import customer_dashboard, manager_dashboard
 from store_app.views.favorite_views import favorites_view
 from store_app.views.product_views import product_list, product_detail, create_product, delete_products
+from store_project import settings
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
@@ -63,3 +65,6 @@ urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
 ]
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

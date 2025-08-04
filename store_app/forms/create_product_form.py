@@ -6,11 +6,12 @@ from ..models import Product, Category, Store
 class CreatProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['category', 'name', 'description', 'price', 'available', 'store']
+        fields = ['category', 'name', 'description', 'price', 'available', 'store', 'image', 'external_url']
 
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
             'price': forms.NumberInput(attrs={'step': '0.01'}),
+            'external_url': forms.URLInput(attrs={'placeholder': 'https://example.com'}),
         }
 
         labels = {
@@ -19,7 +20,9 @@ class CreatProductForm(forms.ModelForm):
             'description': 'Описание',
             'price': 'Цена',
             'available': 'Доступен для продажи',
-            'store': 'Магазин'
+            'store': 'Магазин',
+            'image': 'Фотография товара',
+            'external_url': 'Ссылка на товар'
         }
 
     def __init__(self, *args, **kwargs):

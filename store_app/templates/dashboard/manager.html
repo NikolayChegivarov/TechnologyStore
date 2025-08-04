@@ -74,7 +74,7 @@
                         <td><input type="checkbox" name="product_ids" value="{{ product.id }}" class="form-check-input"></td>
                         <td>{{ product.name }}</td>
                         <td>{{ product.category.name }}</td>
-                        <td>{{ product.store.city }}</td>
+                        <td>{{ product.store.address  }}</td>
                         <td>{{ product.price }} ₽</td>
                         <td>
                             <span class="badge bg-{% if product.available %}success{% else %}danger{% endif %}">

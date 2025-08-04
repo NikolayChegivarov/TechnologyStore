@@ -12,9 +12,6 @@ def customer_dashboard(request):
     - Использует шаблон dashboard/customer.html"""
     return render(request, 'dashboard/customer.html')
 
-# @login_required
-# def manager_dashboard(request):
-#     return render(request, 'dashboard/manager.html')
 
 @login_required
 def manager_dashboard(request):
