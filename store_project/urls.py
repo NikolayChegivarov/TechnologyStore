@@ -23,7 +23,7 @@ from store_app.views.auth_views import login_view, CustomerSignUpView, ManagerSi
 from store_app.views.cart_views import cart_view, add_to_cart
 from store_app.views.dashboard_views import customer_dashboard, manager_dashboard
 from store_app.views.favorite_views import favorites_view
-from store_app.views.product_views import product_list, product_detail, create_product
+from store_app.views.product_views import product_list, product_detail, create_product, delete_products
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
@@ -43,6 +43,7 @@ urlpatterns = [
 
     # Product URLs
     path('manager/create-product/', create_product, name='create_product'), # Создание продукта.
+    path('manager/delete-products/', delete_products, name='delete_products'), # Удаление продукта.
 
     path('products/', product_list, name='product_list'), # Список продуктов
     path('products/<slug:category_slug>/', product_list, name='product_list_by_category'), # Список прод по категории.

@@ -45,6 +45,15 @@ def create_product(request):
     return render(request, 'create_product.html', {'form': form})
 
 
+def delete_products(request):
+    if request.method == 'POST':
+        product_ids = request.POST.getlist('product_ids')
+        Product.objects.filter(id__in=product_ids).delete()
+        # Перенаправляем обратно на dashboard с сохранением фильтров
+        return redirect('manager_dashboard')
+    return redirect('manager_dashboard')
+
+
 def product_list(request, category_slug=None):
     """Отображает список товаров с возможностью фильтрации по категории:
     - Получает все доступные товары (available=True)
