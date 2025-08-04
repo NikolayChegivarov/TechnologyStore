@@ -8,7 +8,11 @@ class CreatProductForm(forms.ModelForm):
         model = Product
         fields = ['category', 'name', 'description', 'price', 'available', 'store']
 
-        # Добавляем русские названия полей
+        widgets = {
+            'description': forms.Textarea(attrs={'rows': 3}),
+            'price': forms.NumberInput(attrs={'step': '0.01'}),
+        }
+
         labels = {
             'category': 'Категория',
             'name': 'Название товара',
@@ -18,8 +22,7 @@ class CreatProductForm(forms.ModelForm):
             'store': 'Магазин'
         }
 
-        # Дополнительно можно настроить виджеты для лучшего отображения
-        widgets = {
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'Введите описание товара'}),
-            'price': forms.NumberInput(attrs={'step': '0.01', 'min': '0'}),
-        }
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['category'].empty_label = "Выберите категорию"
+        self.fields['store'].empty_label = "Выберите магазин"

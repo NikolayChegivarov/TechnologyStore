@@ -25,18 +25,25 @@ def create_product(request):
     if request.method == 'POST':
         form = CreatProductForm(request.POST)
         if form.is_valid():
+            # Создаем объект продукта, но пока не сохраняем в БД
             product = form.save(commit=False)
+            # Устанавливаем создателя продукта
             product.created_by = request.user.manager_profile
+            # Теперь сохраняем в БД
             product.save()
-            return render(request, 'create_product.html', {
-                'form': CreatProductForm(),  # Используем новое имя формы
+
+            # Подготавливаем контекст для отображения
+            context = {
+                'form': CreatProductForm(),  # Новая пустая форма
                 'success_message': f'Товар "{product.name}" успешно создан!',
-                'created_product': product
-            })
+                'created_product': product  # Передаем созданный продукт
+            }
+            return render(request, 'create_product.html', context)
     else:
         form = CreatProductForm()
 
     return render(request, 'create_product.html', {'form': form})
+
 
 def product_list(request, category_slug=None):
     """Отображает список товаров с возможностью фильтрации по категории:
