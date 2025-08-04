@@ -228,10 +228,10 @@ class User(AbstractUser):  # Пользователь
 class Product(models.Model):  # Продукт
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255, db_index=True)
-    description = models.TextField(blank=True)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
-    available = models.BooleanField(default=True)
-    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')
+    description = models.TextField(blank=True)  # описание
+    price = models.DecimalField(max_digits=10, decimal_places=2)  # цена
+    available = models.BooleanField(default=True)  # наличие
+    store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')  # филиал
     created_by = models.ForeignKey(
         Manager,
         on_delete=models.PROTECT,

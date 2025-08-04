@@ -1,0 +1,44 @@
+<!-- Создание товара -->
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Создание нового товара</h2>
+    <a href="{% url 'manager_dashboard' %}" class="btn btn-secondary mb-3">Назад</a>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Создать товар</button>
+            </form>
+        </div>
+
+        {% if success_message %}
+        <div class="col-md-6">
+            <div class="alert alert-success">
+                {{ success_message }}
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">{{ created_product.name }}</h5>
+                    <p class="card-text">{{ created_product.description }}</p>
+                    <p class="card-text"><strong>Цена:</strong> {{ created_product.price }} руб.</p>
+                    <p class="card-text"><strong>Категория:</strong> {{ created_product.category.name }}</p>
+                    <p class="card-text"><strong>Магазин:</strong> {{ created_product.store.city }}</p>
+                    <p class="card-text">
+                        <strong>Статус:</strong>
+                        {% if created_product.available %}
+                            <span class="text-success">Доступен</span>
+                        {% else %}
+                            <span class="text-danger">Нет в наличии</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

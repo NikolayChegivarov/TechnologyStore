@@ -23,8 +23,7 @@ from store_app.views.auth_views import login_view, CustomerSignUpView, ManagerSi
 from store_app.views.cart_views import cart_view, add_to_cart
 from store_app.views.dashboard_views import customer_dashboard, manager_dashboard
 from store_app.views.favorite_views import favorites_view
-from store_app.views.product_views import product_list, product_detail
-
+from store_app.views.product_views import product_list, product_detail, create_product
 
 urlpatterns = [
     path('', TemplateView.as_view(template_name='home.html'), name='home'),
@@ -32,18 +31,19 @@ urlpatterns = [
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),  # Разлогиниться.
     path('signup/', CustomerSignUpView.as_view(), name='signup'),  # Сортирует пользователя, направляет на его стр.
     path('signup/customer/', CustomerSignUpView.as_view(), name='customer_signup'), # Регистрация покупателя.
-    path('signup/manager/', ManagerSignUpView.as_view(), name='manager_signup'),  # Регистрация менеджера.
+    path('signup/manager/', ManagerSignUpView.as_view(), name='manager_signup'),  # Регистрация менеджера(панель админа).
 
     # Политика конфиденциальности
     path('privacy/', TemplateView.as_view(template_name='privacy.html'), name='privacy_policy'),
 
     # Dashboard URLs
-    # Неиспользуется
+    path('manager/dashboard/', manager_dashboard, name='manager_dashboard'),  # Отображает страницу менеджера.
+    # Не используется пока.
     path('customer/dashboard/', customer_dashboard, name='customer_dashboard'), # Отображает страницу покупателя.
 
-    path('manager/dashboard/', manager_dashboard, name='manager_dashboard'),  # Отображает страницу менеджера.
-
     # Product URLs
+    path('manager/create-product/', create_product, name='create_product'), # Создание продукта.
+
     path('products/', product_list, name='product_list'), # Список продуктов
     path('products/<slug:category_slug>/', product_list, name='product_list_by_category'), # Список прод по категории.
     path('product/<int:id>/<slug:slug>/', product_detail, name='product_detail'),  # Детали продукта

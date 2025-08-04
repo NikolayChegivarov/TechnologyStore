@@ -1,7 +1,42 @@
-# Список товаров / Детали товара.
-from django.shortcuts import render, get_object_or_404
+# Список товаров / Детали товара / Создание товара
+from django.shortcuts import render, get_object_or_404, redirect
+
+from ..forms.create_product_form import CreatProductForm
 from ..models import Product, Category
 
+
+def create_product(request):
+    """Обрабатывает создание нового товара:
+    - Проверяет аутентификацию пользователя и его роль (только MANAGER)
+    - При GET-запросе отображает пустую форму создания товара
+    - При POST-запросе валидирует форму и сохраняет товар, привязывая к менеджеру
+    - В случае успеха отображает форму с сообщением об успешном создании
+    - Использует шаблон create_product.html
+
+    Args:
+        request (HttpRequest): Объект запроса
+
+    Returns:
+        HttpResponse: Ответ с формой или редирект для неавторизованных пользователей
+    """
+    if not request.user.is_authenticated or request.user.role != 'MANAGER':
+        return redirect('login')
+
+    if request.method == 'POST':
+        form = CreatProductForm(request.POST)
+        if form.is_valid():
+            product = form.save(commit=False)
+            product.created_by = request.user.manager_profile
+            product.save()
+            return render(request, 'create_product.html', {
+                'form': CreatProductForm(),  # Используем новое имя формы
+                'success_message': f'Товар "{product.name}" успешно создан!',
+                'created_product': product
+            })
+    else:
+        form = CreatProductForm()
+
+    return render(request, 'create_product.html', {'form': form})
 
 def product_list(request, category_slug=None):
     """Отображает список товаров с возможностью фильтрации по категории:

@@ -1,9 +1,28 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Manager, Store
+from .models import User, Manager, Store, Category
+
+
+class CategoryAdmin(admin.ModelAdmin):
+    """Админ-панель для управления категориями товаров:"""
+    list_display = ('name', 'created_at', 'updated_at')
+    search_fields = ('name',)
+    ordering = ('name',)
+    readonly_fields = ('created_at', 'updated_at')
+
+    fieldsets = (
+        (None, {
+            'fields': ('name',)
+        }),
+        ('Дополнительная информация', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
 
 class StoreAdmin(admin.ModelAdmin):
+    """Админ-интерфейс для управления магазинами (филиалами):"""
     list_display = ('city', 'address', 'created_at', 'updated_at')
     search_fields = ('city', 'address')
     list_filter = ('city', 'created_at')
@@ -24,8 +43,6 @@ class StoreAdmin(admin.ModelAdmin):
 class CustomUserAdmin(UserAdmin):
     """
     Кастомный админ-класс для модели User в Django-админке:
-    определяет отображаемые поля в списке пользователей, группирует поля по разделам
-    (учётные данные, персональные данные, права доступа, даты), добавляет подсказки к полям.
     """
     list_display = ('username', 'email', 'role', 'is_staff')
     list_filter = ('role', 'is_staff', 'is_superuser', 'is_active')
@@ -92,5 +109,6 @@ class CustomUserAdmin(UserAdmin):
                 obj.manager_profile = manager
                 obj.save()
 
+admin.site.register(Category, CategoryAdmin)
 admin.site.register(Store, StoreAdmin)
 admin.site.register(User, CustomUserAdmin)
