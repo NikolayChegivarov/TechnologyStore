@@ -36,10 +36,27 @@ class Store(models.Model):  # Филиалы
         ]
 
 
-class Category(models.Model):    # Категории
-    name = models.CharField(max_length=255)
-    created_at = models.DateTimeField(default=timezone.now)
-    updated_at = models.DateTimeField(auto_now=True)
+class Category(models.Model):
+    name = models.CharField(max_length=255, verbose_name="Название")
+    slug = models.SlugField(
+        max_length=255,
+        unique=True,
+        verbose_name="ЧПУ-ссылка",
+        help_text="Уникальный идентификатор для URL"
+    )
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="Дата создания")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Дата обновления")
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name)
+            unique_slug = base_slug
+            num = 1
+            while Category.objects.filter(slug=unique_slug).exists():
+                unique_slug = f"{base_slug}-{num}"
+                num += 1
+            self.slug = unique_slug
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -48,6 +65,9 @@ class Category(models.Model):    # Категории
         verbose_name = "Категория"
         verbose_name_plural = "Категории"
         ordering = ['name']
+        indexes = [
+            models.Index(fields=['slug']),
+        ]
 
 
 class Manager(models.Model):  # Продавец

@@ -1,14 +1,167 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8 text-center">
             <h1>Добро пожаловать в TechStore</h1>
-            <p class="lead">Лучший выбор электроники и инструментов</p>
-            
-
+            <p class="lead">Лучший выбор бу техники по выгодным ценам</p>
         </div>
     </div>
+
+    <!-- Фильтры -->
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <form method="get" action="{% url 'home' %}">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="city" class="form-label">Город</label>
+                                <select class="form-select" id="city" name="city">
+                                    <option value="">Все города</option>
+                                    {% for city in cities %}
+                                        <option value="{{ city }}" {% if selected_city == city %}selected{% endif %}>{{ city }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="store" class="form-label">Филиал</label>
+                                <select class="form-select" id="store" name="store">
+                                    <option value="">Все филиалы</option>
+                                    {% for store in stores %}
+                                        <option value="{{ store.id }}" {% if selected_store == store.id|stringformat:"s" %}selected{% endif %}>{{ store.address }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="category" class="form-label">Категория</label>
+                                <select class="form-select" id="category" name="category">
+                                    <option value="">Все категории</option>
+                                    {% for category in categories %}
+                                        <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-12 text-center">
+                                <button type="submit" class="btn btn-primary me-2">Применить фильтры</button>
+                                <a href="{% url 'home' %}" class="btn btn-outline-secondary">Сбросить</a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Карточки товаров -->
+    <div class="row">
+        {% if products %}
+            {% for product in products %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <div class="row g-0">
+                            <!-- Изображение товара -->
+                            <div class="col-md-4">
+                                {% if product.image %}
+                                    <img src="{{ product.image.url }}" class="img-fluid rounded-start h-100" alt="{{ product.name }}" style="object-fit: cover;">
+                                {% else %}
+                                    <div class="text-center py-5 bg-light h-100 d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-image fa-3x text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Информация о товаре -->
+                            <div class="col-md-8">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <h5 class="card-title">
+                                                {% if product.external_url %}
+                                                    <a href="{{ product.external_url }}" target="_blank" class="text-decoration-none" id="product-link-{{ product.id }}">
+                                                        {{ product.name }} <i class="fas fa-external-link-alt fa-xs"></i>
+                                                    </a>
+                                                {% else %}
+                                                    {{ product.name }}
+                                                {% endif %}
+                                            </h5>
+                                            <p class="card-text mb-1">
+                                                <strong class="fs-4">{{ product.price }} ₽</strong>
+                                            </p>
+                                            <p class="card-text mb-1">
+                                                <small class="text-muted">{{ product.category.name }}</small>
+                                            </p>
+                                            <p class="card-text mb-1">
+                                                <i class="fas fa-map-marker-alt text-primary"></i>
+                                                <small>{{ product.store.city }}, {{ product.store.address }}</small>
+                                            </p>
+                                            {% if product.description %}
+                                                <p class="card-text mt-2">
+                                                    <small>{{ product.description|truncatechars:150 }}</small>
+                                                </p>
+                                            {% endif %}
+                                        </div>
+                                        {% if user.is_authenticated and user.role == 'CUSTOMER' %}
+                                            <button class="btn btn-sm btn-outline-secondary favorite-btn"
+                                                    data-product-id="{{ product.id }}"
+                                                    id="favorite-btn-{{ product.id }}"
+                                                    data-initial-state="{% if product.id in user_favorites %}active{% else %}inactive{% endif %}">
+                                                <i class="{% if product.id in user_favorites %}fas{% else %}far{% endif %} fa-star"></i>
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <div class="alert alert-info">Товары не найдены. Попробуйте изменить параметры фильтрации.</div>
+            </div>
+        {% endif %}
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+$(document).on('click', '.favorite-btn', function() {
+    const btn = $(this);
+    const productId = btn.data('product-id');
+    const csrfToken = $('input[name="csrfmiddlewaretoken"]').val() || '{{ csrf_token }}';
+
+    $.ajax({
+        url: '{% url "toggle_favorite" %}',
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': csrfToken,
+            'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'
+        },
+        data: {
+            'product_id': productId
+        },
+        success: function(data) {
+            if (data.status === 'added') {
+                btn.find('i').removeClass('far').addClass('fas').css('color', '#ffc107');
+            } else if (data.status === 'removed') {
+                btn.find('i').removeClass('fas').addClass('far').css('color', '');
+            }
+
+            // Обновляем счетчик в навигации
+            $('.cart-counter').text(data.count).toggle(data.count > 0);
+        },
+        error: function(xhr) {
+            const error = xhr.responseJSON?.message || 'Произошла ошибка';
+            alert(error);
+        }
+    });
+});
+</script>
 {% endblock %}

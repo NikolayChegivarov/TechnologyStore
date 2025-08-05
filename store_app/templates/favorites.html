@@ -2,7 +2,19 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2>Избранное</h2>
-    <p>Здесь будут отображаться ваши избранные товары.</p>
+    <h2>Ваши избранные товары</h2>
+    {% if favorites %}
+        <div class="row">
+            {% for favorite in favorites %}
+                <div class="col-md-4 mb-4">
+                    {% with product=favorite.product %}
+                        <!-- Карточка товара как в home.html -->
+                    {% endwith %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">У вас пока нет избранных товаров</div>
+    {% endif %}
 </div>
 {% endblock %}
