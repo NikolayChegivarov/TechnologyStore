@@ -4,7 +4,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token }}">
     <title>{% block title %}Магазин электроники{% endblock %}</title>
 
     <!-- Bootstrap CSS -->
@@ -21,33 +20,6 @@
         body {
             display: flex;
             flex-direction: column;
-        }
-
-        main {
-            flex: 1 0 auto;
-            padding-bottom: 20px; /* Отступ от подвала */
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-        }
-        .footer {
-            background-color: #f8f9fa;
-            padding: 20px 0;
-            margin-top: 40px;
-        }
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-        }
-        .cart-counter {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            font-size: 12px;
-        }
-        body {
             background-image: url('{% static "images/background.png" %}');
             background-size: cover;
             background-position: center;
@@ -55,12 +27,42 @@
             background-repeat: no-repeat;
             min-height: 100vh;
         }
+
         main {
+            flex: 1 0 auto;
+            padding-bottom: 20px;
             background-color: rgba(255, 255, 255, 0.9);
             border-radius: 10px;
             padding: 20px;
             margin-top: 20px;
             margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            font-weight: bold;
+        }
+
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px 0;
+            margin-top: 40px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+        }
+
+        .cart-counter {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            font-size: 12px;
+        }
+
+        .favorite-counter {
+            position: relative;
         }
     </style>
 
@@ -79,28 +81,23 @@
 
             <div class="collapse navbar-collapse" id="navbarContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                    {% if user.is_authenticated and user.role == 'MANAGER' %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'manager_dashboard' %}">
-                            <i class="fas fa-tachometer-alt"></i> Панель менеджера
+                        <a class="nav-link" href="{% url 'home' %}">
+                            <i class="fas fa-home"></i> Главная
                         </a>
                     </li>
-                    {% endif %}
                 </ul>
 
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     {% if user.is_authenticated %}
-                        {% if user.role == 'CUSTOMER' %}
-                            <li class="nav-item position-relative">
-                                <a class="nav-link" href="{% url 'favorites' %}" title="Избранное">
-                                    <i class="fas fa-star"></i>
-                                    {% if favorite_count > 0 %}
-                                    <span class="cart-counter badge bg-warning text-dark">{{ favorite_count }}</span>
-                                    {% endif %}
-                                </a>
-                            </li>
-                        {% endif %}
+                        <li class="nav-item favorite-counter">
+                            <a class="nav-link" href="{% url 'favorites' %}" title="Избранное">
+                                <i class="fas fa-star"></i>
+                                {% if favorite_count > 0 %}
+                                <span class="cart-counter badge bg-warning text-dark">{{ favorite_count }}</span>
+                                {% endif %}
+                            </a>
+                        </li>
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -192,14 +189,23 @@
         </div>
     </footer>
 
+    <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Инициализация tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
+
+            // Обновление счетчика избранного при загрузке страницы
+            if (typeof updateFavoriteCounter === 'function') {
+                updateFavoriteCounter();
+            }
         });
     </script>
 

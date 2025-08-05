@@ -95,6 +95,12 @@ def home(request):
             user=request.user.customer_profile
         ).values_list('product_id', flat=True)
 
+    favorite_count = 0
+    if request.user.is_authenticated and request.user.role == 'CUSTOMER':
+        favorite_count = FavoriteProduct.objects.filter(
+            user=request.user.customer_profile
+        ).count()
+
     context = {
         'products': products,
         'cities': cities,

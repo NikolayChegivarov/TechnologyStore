@@ -1,24 +1,30 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render
 from django.http import JsonResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST, require_GET
 from django.contrib.auth.decorators import login_required
 from store_app.models import Product, FavoriteProduct
 
 
 @login_required
 def favorites_view(request):
-    """Отображение страницы с избранными товарами"""
+    """Просмотр избранных товаров"""
     if request.user.role != 'CUSTOMER':
         return render(request, 'error.html', {'message': 'Доступ запрещен'}, status=403)
 
-    favorites = FavoriteProduct.objects.filter(user=request.user.customer_profile)
-    return render(request, 'favorites.html', {'favorites': favorites})
+    favorites = FavoriteProduct.objects.filter(
+        user=request.user.customer_profile
+    ).select_related('product')
+
+    return render(request, 'favorites.html', {
+        'favorites': favorites,
+        'favorite_count': favorites.count()
+    })
 
 
-@require_http_methods(["POST"])
+@require_POST
 @login_required
 def toggle_favorite(request):
-    """Добавление/удаление товара из избранного (AJAX)"""
+    """Добавление/удаление из избранного"""
     if request.user.role != 'CUSTOMER':
         return JsonResponse({'status': 'error', 'message': 'Доступ запрещен'}, status=403)
 
@@ -29,8 +35,8 @@ def toggle_favorite(request):
     try:
         product = Product.objects.get(id=product_id)
         customer = request.user.customer_profile
-    except (Product.DoesNotExist, AttributeError):
-        return JsonResponse({'status': 'error', 'message': 'Товар не найден'}, status=404)
+    except (Product.DoesNotExist, AttributeError) as e:
+        return JsonResponse({'status': 'error', 'message': str(e)}, status=404)
 
     favorite, created = FavoriteProduct.objects.get_or_create(
         user=customer,
