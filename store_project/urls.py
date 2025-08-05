@@ -45,11 +45,11 @@ urlpatterns = [
 
     # Product URLs
     path('manager/create-product/', create_product, name='create_product'), # Создание продукта.
+    path('product/<int:id>/<slug:slug>/', product_detail, name='product_detail'),  # Просмотр продукта.
     path('manager/delete-products/', delete_products, name='delete_products'), # Удаление продукта.
-
     path('products/', product_list, name='product_list'), # Список продуктов
     path('products/<slug:category_slug>/', product_list, name='product_list_by_category'), # Список прод по категории.
-    path('product/<int:id>/<slug:slug>/', product_detail, name='product_detail'),  # Детали продукта
+
 
     # Favorites URLs
     path('products/favorites/', favorites_view, name='favorites'),  # Избранные товары

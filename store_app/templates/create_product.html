@@ -3,11 +3,11 @@
 {% block content %}
 <div class="container py-5">
     <div class="row justify-content-center">
-        <div class="col-lg-8">
-            <div class="card shadow">
+        <div class="col-lg-10">
+            <div class="card shadow-lg">
                 <div class="card-header bg-primary text-white">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h2 class="h5 mb-0">Создание нового товара</h2>
+                        <h2 class="h5 mb-0"><i class="fas fa-plus-circle me-2"></i> Создание нового товара</h2>
                         <a href="{% url 'manager_dashboard' %}" class="btn btn-sm btn-light">
                             <i class="fas fa-arrow-left me-1"></i> Назад
                         </a>
@@ -15,126 +15,170 @@
                 </div>
 
                 <div class="card-body">
+                    {% if success_message %}
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-check-circle me-2"></i>
+                                {{ success_message }}
+                            </div>
+                            <div>
+                                <a href="{% url 'product_detail' id=created_product.id slug=created_product.slug %}"
+                                   class="btn btn-success btn-sm ms-3">
+                                    <i class="fas fa-eye me-1"></i> Посмотреть товар
+                                </a>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
                     <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
                         {% csrf_token %}
 
                         {% if form.non_field_errors %}
                         <div class="alert alert-danger">
                             {% for error in form.non_field_errors %}
-                                {{ error }}
+                                <p class="mb-0">{{ error }}</p>
                             {% endfor %}
                         </div>
                         {% endif %}
 
                         <div class="row g-3">
-                            <!-- Основные поля -->
+                            <!-- Название товара -->
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.name.id_for_label }}" class="form-label">
-                                        Название товара <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.name }}
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="product_name"
+                                           name="{{ form.name.name }}"
+                                           value="{{ form.name.value|default:'' }}"
+                                           required>
+                                    <label for="product_name">Название товара *</label>
                                     {% if form.name.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {{ form.name.errors }}
+                                        {% for error in form.name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
 
+                            <!-- Цена -->
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.price.id_for_label }}" class="form-label">
-                                        Цена <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.price }}
+                                <div class="form-floating mb-3">
+                                    <input type="number" class="form-control" id="product_price"
+                                           name="{{ form.price.name }}"
+                                           value="{{ form.price.value|default:'' }}"
+                                           step="0.01" min="0" required>
+                                    <label for="product_price">Цена *</label>
                                     {% if form.price.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {{ form.price.errors }}
+                                        {% for error in form.price.errors %}
+                                            {{ error }}
+                                        {% endfor %}
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
 
+                            <!-- Категория -->
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.category.id_for_label }}" class="form-label">
-                                        Категория <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.category }}
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="product_category"
+                                            name="{{ form.category.name }}" required>
+                                        {% for value, label in form.category.field.choices %}
+                                            <option value="{{ value }}"
+                                                {% if form.category.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="product_category">Категория *</label>
                                     {% if form.category.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {{ form.category.errors }}
+                                        {% for error in form.category.errors %}
+                                            {{ error }}
+                                        {% endfor %}
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
 
+                            <!-- Магазин -->
                             <div class="col-md-6">
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.store.id_for_label }}" class="form-label">
-                                        Магазин <span class="text-danger">*</span>
-                                    </label>
-                                    {{ form.store }}
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="product_store"
+                                            name="{{ form.store.name }}" required>
+                                        {% for value, label in form.store.field.choices %}
+                                            <option value="{{ value }}"
+                                                {% if form.store.value == value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="product_store">Магазин *</label>
                                     {% if form.store.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {{ form.store.errors }}
+                                        {% for error in form.store.errors %}
+                                            {{ error }}
+                                        {% endfor %}
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
 
-                            <!-- Поле для фотографии -->
+                            <!-- Фотография товара -->
                             <div class="col-12">
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.image.id_for_label }}" class="form-label">
-                                        Фотография товара
-                                    </label>
-                                    <div class="custom-file">
-                                        {{ form.image }}
-                                        <label class="custom-file-label" for="{{ form.image.id_for_label }}">
-                                            Выберите файл...
+                                <div class="mb-3">
+                                    <label for="product_image" class="form-label">Фотография товара</label>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="product_image"
+                                               name="{{ form.image.name }}" accept="image/*">
+                                        <label class="input-group-text" for="product_image">
+                                            <i class="fas fa-upload"></i>
                                         </label>
                                     </div>
                                     {% if form.image.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {{ form.image.errors }}
+                                        {% for error in form.image.errors %}
+                                            {{ error }}
+                                        {% endfor %}
                                     </div>
                                     {% endif %}
-                                    <small class="form-text text-muted">
-                                        Рекомендуемый размер: 800x600px, формат JPG или PNG
-                                    </small>
+                                    <small class="form-text text-muted">Рекомендуемый размер: 800x600px, формат JPG/PNG</small>
                                 </div>
                             </div>
 
-                            <!-- Поле для ссылки -->
+                            <!-- Внешняя ссылка -->
                             <div class="col-12">
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.external_url.id_for_label }}" class="form-label">
-                                        Ссылка на товар
-                                    </label>
-                                    {{ form.external_url }}
+                                <div class="form-floating mb-3">
+                                    <input type="url" class="form-control" id="product_external_url"
+                                           name="{{ form.external_url.name }}"
+                                           value="{{ form.external_url.value|default:'' }}"
+                                           placeholder="https://example.com">
+                                    <label for="product_external_url">Ссылка на товар (необязательно)</label>
                                     {% if form.external_url.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {{ form.external_url.errors }}
+                                        {% for error in form.external_url.errors %}
+                                            {{ error }}
+                                        {% endfor %}
                                     </div>
                                     {% endif %}
-                                    <small class="form-text text-muted">
-                                        Например: https://example.com/product
-                                    </small>
                                 </div>
                             </div>
 
                             <!-- Описание -->
                             <div class="col-12">
-                                <div class="form-group mb-3">
-                                    <label for="{{ form.description.id_for_label }}" class="form-label">
-                                        Описание
-                                    </label>
-                                    {{ form.description }}
+                                <div class="form-floating mb-3">
+                                    <textarea class="form-control" id="product_description"
+                                              name="{{ form.description.name }}"
+                                              style="height: 150px">{{ form.description.value|default:'' }}</textarea>
+                                    <label for="product_description">Описание товара</label>
                                     {% if form.description.errors %}
                                     <div class="invalid-feedback d-block">
-                                        {{ form.description.errors }}
+                                        {% for error in form.description.errors %}
+                                            {{ error }}
+                                        {% endfor %}
                                     </div>
                                     {% endif %}
                                 </div>
@@ -142,18 +186,20 @@
 
                             <!-- Доступность -->
                             <div class="col-12">
-                                <div class="form-check mb-3">
-                                    {{ form.available }}
-                                    <label class="form-check-label" for="{{ form.available.id_for_label }}">
+                                <div class="form-check form-switch mb-4">
+                                    <input type="checkbox" class="form-check-input" id="product_available"
+                                           name="{{ form.available.name }}"
+                                           {% if form.available.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="product_available">
                                         Товар доступен для продажи
                                     </label>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="d-grid mt-4">
-                            <button type="submit" class="btn btn-primary btn-lg">
-                                <i class="fas fa-save me-2"></i> Создать товар
+                        <div class="d-grid mt-2">
+                            <button type="submit" class="btn btn-primary btn-lg py-3">
+                                <i class="fas fa-save me-2"></i> Сохранить товар
                             </button>
                         </div>
                     </form>
@@ -164,87 +210,114 @@
 </div>
 
 <style>
-    .form-control, .form-select, .custom-file-input {
-        border-radius: 0.25rem;
-        padding: 0.375rem 0.75rem;
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
     }
-    .form-control:focus, .form-select:focus, .custom-file-input:focus {
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 1rem;
+        height: calc(3.5rem + 2px);
+        border: 1px solid #dee2e6;
+    }
+
+    .form-floating>label {
+        padding: 1rem;
+        color: #6c757d;
+    }
+
+    .form-control:focus, .form-select:focus {
         border-color: #86b7fe;
         box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
     }
+
     textarea.form-control {
-        min-height: 120px;
+        min-height: 150px;
+        padding-top: 1.5rem;
     }
+
     .invalid-feedback {
         display: block;
         color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
     }
-    .custom-file {
-        position: relative;
-        display: inline-block;
-        width: 100%;
+
+    .form-check-input {
+        width: 3em;
+        height: 1.5em;
     }
-    .custom-file-input {
-        position: relative;
-        z-index: 2;
-        width: 100%;
-        height: calc(2.25rem + 2px);
-        margin: 0;
-        opacity: 0;
+
+    .input-group-text {
+        border-radius: 0 10px 10px 0;
+        background-color: #f8f9fa;
     }
-    .custom-file-label {
-        position: absolute;
-        top: 0;
-        right: 0;
-        left: 0;
-        z-index: 1;
-        height: calc(2.25rem + 2px);
-        padding: 0.375rem 0.75rem;
-        line-height: 1.5;
-        color: #495057;
-        background-color: #fff;
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
+
+    .alert-success {
+        border-radius: 10px;
+        background-color: #d1e7dd;
+        border-color: #badbcc;
     }
-    .custom-file-label::after {
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 3;
-        display: block;
-        height: calc(2.25rem + 2px);
-        padding: 0.375rem 0.75rem;
-        line-height: 1.5;
-        color: #495057;
-        content: "Обзор";
-        background-color: #e9ecef;
-        border-left: 1px solid #ced4da;
-        border-radius: 0 0.25rem 0.25rem 0;
+
+    .btn-primary {
+        background-color: #0d6efd;
+        border-color: #0d6efd;
+    }
+
+    .btn-primary:hover {
+        background-color: #0b5ed7;
+        border-color: #0a58ca;
     }
 </style>
 
 <script>
-    // Обновление названия файла при выборе
-    document.querySelector('.custom-file-input').addEventListener('change', function(e) {
-        var fileName = e.target.files[0] ? e.target.files[0].name : "Выберите файл...";
-        var nextSibling = e.target.nextElementSibling;
-        nextSibling.innerText = fileName;
+    // Показ имени выбранного файла
+    document.getElementById('product_image').addEventListener('change', function(e) {
+        var fileName = e.target.files[0]?.name || "Файл не выбран";
+        var label = e.target.nextElementSibling;
+        label.querySelector('i').className = "fas fa-file-image";
+
+        // Удаляем предыдущее имя файла, если есть
+        var existingFileName = label.querySelector('.file-name');
+        if (existingFileName) {
+            existingFileName.remove();
+        }
+
+        // Добавляем новое имя файла
+        var fileNameSpan = document.createElement('span');
+        fileNameSpan.className = 'file-name ms-2';
+        fileNameSpan.textContent = fileName;
+        label.appendChild(fileNameSpan);
     });
 
     // Валидация формы
-    (function() {
-        'use strict';
+    document.addEventListener('DOMContentLoaded', function() {
         var forms = document.querySelectorAll('.needs-validation');
+
         Array.prototype.slice.call(forms).forEach(function(form) {
             form.addEventListener('submit', function(event) {
                 if (!form.checkValidity()) {
                     event.preventDefault();
                     event.stopPropagation();
                 }
+
                 form.classList.add('was-validated');
             }, false);
+
+            // Добавляем валидацию при изменении полей
+            form.querySelectorAll('input, select, textarea').forEach(function(field) {
+                field.addEventListener('input', function() {
+                    field.classList.remove('is-invalid', 'is-valid');
+
+                    if (field.checkValidity()) {
+                        field.classList.add('is-valid');
+                    } else {
+                        field.classList.add('is-valid');
+                    }
+                });
+            });
         });
-    })();
+    });
 </script>
 {% endblock %}

@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils import timezone
+from django.utils.text import slugify
 from enum import Enum
 
 
@@ -251,6 +252,24 @@ class Product(models.Model):  # Продукт
     )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
+    slug = models.SlugField(
+        max_length=255,
+        unique=True,
+        blank=True,
+        db_index=True,
+        verbose_name="ЧПУ-ссылка"
+    )  # для читаемых ссылок
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base_slug = slugify(self.name)[:250]  # Ограничение длины
+            unique_slug = base_slug
+            num = 1
+            while Product.objects.filter(slug=unique_slug).exists():
+                unique_slug = f"{base_slug}-{num}"
+                num += 1
+            self.slug = unique_slug
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
@@ -262,6 +281,7 @@ class Product(models.Model):  # Продукт
         indexes = [
             models.Index(fields=['name', 'price']),
         ]
+        unique_together = ('name', 'store')
 
 class FavoriteProduct(models.Model):  # Избранные товары
     user = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='favorite_products')

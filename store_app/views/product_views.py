@@ -10,7 +10,7 @@ def create_product(request):
     - Проверяет аутентификацию пользователя и его роль (только MANAGER)
     - При GET-запросе отображает пустую форму создания товара
     - При POST-запросе валидирует форму и сохраняет товар, привязывая к менеджеру
-    - В случае успеха отображает форму с сообщением об успешном создании
+    - В случае успеха отображает форму с сообщением об успешном создании и данными товара
     - Использует шаблон create_product.html
 
     Args:
@@ -19,17 +19,36 @@ def create_product(request):
     Returns:
         HttpResponse: Ответ с формой или редирект для неавторизованных пользователей
     """
+    if not request.user.is_authenticated or request.user.role != 'MANAGER':
+        return redirect('login')
+
+    success_message = None
+    created_product = None
+
     if request.method == 'POST':
-        form = CreatProductForm(request.POST, request.FILES)  # Обрабатываем файлы
+        form = CreatProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
             product.created_by = request.user.manager_profile
-            product.save()
-            return redirect('product_detail', id=product.id, slug=product.slug)
+            product.save()  # Автоматически генерирует slug
+
+            # Убедимся, что slug не пустой
+            if not product.slug:
+                product.slug = f"product-{product.id}"
+                product.save()
+
+            success_message = f"Товар '{product.name}' успешно создан!"
+            created_product = product
+            # Не делаем редирект, а рендерим ту же страницу с сообщением
     else:
         form = CreatProductForm()
 
-    return render(request, 'create_product.html', {'form': form})
+    context = {
+        'form': form,
+        'success_message': success_message,
+        'created_product': created_product
+    }
+    return render(request, 'create_product.html', context)
 
 
 def delete_products(request):
@@ -71,11 +90,11 @@ def product_detail(request, id, slug):
     - Находит товар по id и slug (двойная проверка URL)
     - Проверяет, что товар доступен (available=True)
     - Возвращает 404 если товар не найден или недоступен
-    - Использует шаблон product/detail.html
+    - Использует шаблон view_product.html
 
     Args:
         id (int): ID товара в базе данных
         slug (str): ЧПУ-название товара
     """
     product = get_object_or_404(Product, id=id, slug=slug, available=True)
-    return render(request, 'product/detail.html', {'product': product})
+    return render(request, 'view_product.html', {'product': product})
