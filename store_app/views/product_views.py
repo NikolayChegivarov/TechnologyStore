@@ -98,13 +98,11 @@ def product_list(request, category_slug=None):
 def product_detail(request, id, slug):
     """Отображает детальную страницу товара:
     - Находит товар по id и slug (двойная проверка URL)
-    - Проверяет, что товар доступен (available=True)
-    - Возвращает 404 если товар не найден или недоступен
-    - Использует шаблон view_product.html
-
-    Args:
-        id (int): ID товара в базе данных
-        slug (str): ЧПУ-название товара
+    - Для менеджеров показывает все товары (даже unavailable)
+    - Для клиентов показывает только available товары
     """
-    product = get_object_or_404(Product, id=id, slug=slug, available=True)
+    if request.user.is_authenticated and request.user.role == 'MANAGER':
+        product = get_object_or_404(Product, id=id, slug=slug)
+    else:
+        product = get_object_or_404(Product, id=id, slug=slug, available=True)
     return render(request, 'view_product.html', {'product': product})
