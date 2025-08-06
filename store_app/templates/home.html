@@ -99,6 +99,11 @@
                                                 <i class="fas fa-map-marker-alt text-primary"></i>
                                                 <small>{{ product.store.city }}, {{ product.store.address }}</small>
                                             </p>
+                                            <p class="card-text mb-1">
+                                                <span class="badge bg-{% if product.available %}success{% else %}danger{% endif %}">
+                                                    {% if product.available %}Доступен{% else %}Нет в наличии{% endif %}
+                                                </span>
+                                            </p>
                                             {% if product.description %}
                                                 <p class="card-text mt-2">
                                                     <small>{{ product.description|truncatechars:150 }}</small>
@@ -130,12 +135,12 @@
 {% endblock %}
 
 {% block extra_js %}
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
 $(document).on('click', '.favorite-btn', function() {
     const btn = $(this);
     const productId = btn.data('product-id');
     const csrfToken = $('input[name="csrfmiddlewaretoken"]').val() || '{{ csrf_token }}';
+    const isActive = btn.find('i').hasClass('fas');
 
     $.ajax({
         url: '{% url "toggle_favorite" %}',
@@ -149,17 +154,36 @@ $(document).on('click', '.favorite-btn', function() {
         },
         success: function(data) {
             if (data.status === 'added') {
-                btn.find('i').removeClass('far').addClass('fas').css('color', '#ffc107');
+                btn.find('i').removeClass('far').addClass('fas');
+                btn.data('initial-state', 'active');
             } else if (data.status === 'removed') {
-                btn.find('i').removeClass('fas').addClass('far').css('color', '');
+                btn.find('i').removeClass('fas').addClass('far');
+                btn.data('initial-state', 'inactive');
             }
 
-            // Обновляем счетчик в навигации
-            $('.cart-counter').text(data.count).toggle(data.count > 0);
+            // Обновляем глобальный счетчик избранного
+            if (typeof updateFavoriteCounter === 'function') {
+                updateFavoriteCounter(data.count);
+            }
         },
         error: function(xhr) {
             const error = xhr.responseJSON?.message || 'Произошла ошибка';
             alert(error);
+        }
+    });
+});
+
+// Инициализация состояния кнопок при загрузке
+$(document).ready(function() {
+    $('.favorite-btn').each(function() {
+        const btn = $(this);
+        const initialState = btn.data('initial-state');
+        const icon = btn.find('i');
+
+        if (initialState === 'active') {
+            icon.removeClass('far').addClass('fas');
+        } else {
+            icon.removeClass('fas').addClass('far');
         }
     });
 });

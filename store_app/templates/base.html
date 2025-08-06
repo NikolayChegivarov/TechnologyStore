@@ -54,14 +54,18 @@
             border-radius: 50%;
         }
 
-        .cart-counter {
+        .favorite-counter {
+            position: relative;
+        }
+
+        .favorite-counter .badge {
             position: absolute;
             top: -5px;
             right: -5px;
             font-size: 12px;
         }
 
-        .favorite-counter {
+        .nav-link {
             position: relative;
         }
     </style>
@@ -93,9 +97,9 @@
                         <li class="nav-item favorite-counter">
                             <a class="nav-link" href="{% url 'favorites' %}" title="Избранное">
                                 <i class="fas fa-star"></i>
-                                {% if favorite_count > 0 %}
-                                <span class="cart-counter badge bg-warning text-dark">{{ favorite_count }}</span>
-                                {% endif %}
+                                <span class="badge bg-warning text-dark" id="global-favorite-counter">
+                                    {% if favorite_count > 0 %}{{ favorite_count }}{% endif %}
+                                </span>
                             </a>
                         </li>
 
@@ -202,10 +206,31 @@
                 return new bootstrap.Tooltip(tooltipTriggerEl)
             });
 
-            // Обновление счетчика избранного при загрузке страницы
-            if (typeof updateFavoriteCounter === 'function') {
-                updateFavoriteCounter();
-            }
+            // Функция для обновления счетчика избранного
+            window.updateFavoriteCounter = function(count) {
+                const counter = document.getElementById('global-favorite-counter');
+                counter.textContent = count;
+                if (count > 0) {
+                    counter.style.display = 'inline-block';
+                } else {
+                    counter.style.display = 'none';
+                }
+            };
+
+            // Загрузка количества избранных товаров при загрузке страницы
+            {% if user.is_authenticated and user.role == 'CUSTOMER' %}
+                fetch('{% url "favorites" %}')
+                    .then(response => response.text())
+                    .then(html => {
+                        // Создаем временный элемент для парсинга HTML
+                        const temp = document.createElement('div');
+                        temp.innerHTML = html;
+
+                        // Находим количество товаров в избранном
+                        const favoritesCount = temp.querySelectorAll('.favorite-btn').length;
+                        updateFavoriteCounter(favoritesCount);
+                    });
+            {% endif %}
         });
     </script>
 
