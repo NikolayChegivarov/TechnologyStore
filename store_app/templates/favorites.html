@@ -50,6 +50,11 @@
                                                         <i class="fas fa-map-marker-alt text-primary"></i>
                                                         <small>{{ product.store.city }}, {{ product.store.address }}</small>
                                                     </p>
+                                                    <p class="card-text mb-1">
+                                                        <span class="badge bg-{% if product.available %}success{% else %}danger{% endif %}">
+                                                            {% if product.available %}Доступен{% else %}Нет в наличии{% endif %}
+                                                        </span>
+                                                    </p>
                                                 </div>
                                                 <button class="btn btn-sm btn-outline-secondary favorite-btn"
                                                         data-product-id="{{ product.id }}"
