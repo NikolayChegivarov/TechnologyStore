@@ -18,16 +18,20 @@ def customer_dashboard(request):
 
 @login_required
 def manager_dashboard(request):
-    """Отображает панель управления менеджера:
-    - Доступен только для авторизованных менеджеров
-    - Содержит инструменты управления для менеджеров
-    - Использует шаблон dashboard/manager.html"""
+    """Отображает панель управления менеджера с сортировкой товаров:
+    - Доступные товары (available=True) показываются первыми
+    - Недоступные товары (available=False) сортируются по дате обновления (updated_at)
+    - Самые "старые" недоступные товары показываются внизу списка
+    """
     # Получаем параметры фильтрации из GET-запроса
     selected_store = request.GET.get('store')
     selected_category = request.GET.get('category')
 
-    # Получаем все товары
-    products = Product.objects.all()
+    # Получаем все товары с правильной сортировкой
+    products = Product.objects.all().order_by(
+        '-available',  # Сначала доступные (True), потом недоступные (False)
+        '-updated_at' if request.GET.get('sort') == 'newest' else 'updated_at'
+    )
 
     # Применяем фильтры
     if selected_store:
