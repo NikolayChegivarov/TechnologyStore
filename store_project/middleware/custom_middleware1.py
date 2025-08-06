@@ -28,6 +28,10 @@ class RoleMiddleware:
 
         Возвращает None (разрешение на выполнение представления) или редирект/ошибку 403.
         """
+        # Пропускаем медиа-файлы и статику
+        if request.path.startswith('/media/') or request.path.startswith('/static/'):
+            return None
+
         if not request.user.is_authenticated:
             allowed_urls = [
                 reverse('home'),

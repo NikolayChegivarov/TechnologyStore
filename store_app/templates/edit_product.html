@@ -1,0 +1,261 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h2 class="h5 mb-0"><i class="fas fa-edit me-2"></i> Редактирование товара: {{ product.name }}</h2>
+                        <a href="{% url 'product_detail' id=product.id slug=product.slug %}" class="btn btn-sm btn-light">
+                            <i class="fas fa-arrow-left me-1"></i> Назад
+                        </a>
+                    </div>
+                </div>
+
+                <div class="card-body">
+                    {% if messages %}
+                    <div class="alert alert-success alert-dismissible fade show mb-4">
+                        {% for message in messages %}
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="fas fa-check-circle me-2"></i>
+                                {{ message }}
+                            </div>
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3">
+                            <!-- Название товара -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="text" class="form-control" id="product_name"
+                                           name="name" value="{{ form.name.value }}" required>
+                                    <label for="product_name">Название товара *</label>
+                                    {% if form.name.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.name.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Цена -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <input type="number" class="form-control" id="product_price"
+                                           name="price" value="{{ form.price.value }}" step="0.01" min="0" required>
+                                    <label for="product_price">Цена *</label>
+                                    {% if form.price.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.price.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Категория -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="product_category" name="category" required>
+                                        {% for value, label in form.category.field.choices %}
+                                            <option value="{{ value }}" {% if value == form.category.value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="product_category">Категория *</label>
+                                    {% if form.category.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.category.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Магазин -->
+                            <div class="col-md-6">
+                                <div class="form-floating mb-3">
+                                    <select class="form-select" id="product_store" name="store" required>
+                                        {% for value, label in form.store.field.choices %}
+                                            <option value="{{ value }}" {% if value == form.store.value %}selected{% endif %}>
+                                                {{ label }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="product_store">Магазин *</label>
+                                    {% if form.store.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.store.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Фотография товара -->
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="product_image" class="form-label">Фотография товара</label>
+                                    <div class="input-group">
+                                        <input type="file" class="form-control" id="product_image"
+                                               name="image" accept="image/*">
+                                        <label class="input-group-text" for="product_image">
+                                            <i class="fas fa-upload"></i>
+                                        </label>
+                                    </div>
+                                    {% if product.image %}
+                                    <div class="mt-2">
+                                        <small>Текущее изображение:</small>
+                                        <img src="{{ product.image.url }}" alt="{{ product.name }}"
+                                             class="img-thumbnail mt-2" style="max-height: 150px;">
+                                        <div class="form-check mt-2">
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="clear_image" name="image-clear">
+                                            <label class="form-check-label text-danger" for="clear_image">
+                                                Удалить текущее изображение
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if form.image.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.image.errors }}
+                                    </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Рекомендуемый размер: 800x600px, формат JPG/PNG</small>
+                                </div>
+                            </div>
+
+                            <!-- Внешняя ссылка -->
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <input type="url" class="form-control" id="product_external_url"
+                                           name="external_url" value="{{ form.external_url.value|default:'' }}"
+                                           placeholder="https://example.com">
+                                    <label for="product_external_url">Ссылка на товар (необязательно)</label>
+                                    {% if form.external_url.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.external_url.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Описание -->
+                            <div class="col-12">
+                                <div class="form-floating mb-3">
+                                    <textarea class="form-control" id="product_description"
+                                              name="description" style="height: 150px">{{ form.description.value|default:'' }}</textarea>
+                                    <label for="product_description">Описание товара</label>
+                                    {% if form.description.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {{ form.description.errors }}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <!-- Доступность -->
+                            <div class="col-12">
+                                <div class="form-check form-switch mb-4">
+                                    <input type="checkbox" class="form-check-input" id="product_available"
+                                           name="available" {% if form.available.value %}checked{% endif %}>
+                                    <label class="form-check-label" for="product_available">
+                                        Товар доступен для продажи
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-2">
+                            <button type="submit" class="btn btn-primary btn-lg py-3">
+                                <i class="fas fa-save me-2"></i> Сохранить изменения
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        overflow: hidden;
+    }
+
+    .form-control, .form-select {
+        border-radius: 10px;
+        padding: 1rem;
+        height: calc(3.5rem + 2px);
+        border: 1px solid #dee2e6;
+    }
+
+    .form-floating>label {
+        padding: 1rem;
+        color: #6c757d;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: #86b7fe;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    textarea.form-control {
+        min-height: 150px;
+        padding-top: 1.5rem;
+    }
+
+    .invalid-feedback {
+        display: block;
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 0.25rem;
+    }
+
+    .form-check-input {
+        width: 3em;
+        height: 1.5em;
+    }
+
+    .input-group-text {
+        border-radius: 0 10px 10px 0;
+        background-color: #f8f9fa;
+    }
+
+    .img-thumbnail {
+        max-width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+</style>
+
+<script>
+    // Показ имени выбранного файла
+    document.getElementById('product_image').addEventListener('change', function(e) {
+        var fileName = e.target.files[0]?.name || "Файл не выбран";
+        var label = e.target.nextElementSibling;
+        label.querySelector('i').className = "fas fa-file-image";
+
+        // Удаляем предыдущее имя файла, если есть
+        var existingFileName = label.querySelector('.file-name');
+        if (existingFileName) {
+            existingFileName.remove();
+        }
+
+        // Добавляем новое имя файла
+        var fileNameSpan = document.createElement('span');
+        fileNameSpan.className = 'file-name ms-2';
+        fileNameSpan.textContent = fileName;
+        label.appendChild(fileNameSpan);
+    });
+</script>
+{% endblock %}

@@ -25,7 +25,7 @@ from store_app.views.dashboard_views import manager_dashboard, get_stores_by_cit
     customer_dashboard, home  # , customer_dashboard
 from store_app.views.favorite_views import favorites_view, toggle_favorite
 from store_app.views.product_views import product_list, product_detail, create_product, delete_products, \
-    deactivate_products
+    deactivate_products, edit_product
 from store_project import settings
 
 urlpatterns = [
@@ -49,6 +49,7 @@ urlpatterns = [
     # Product URLs
     path('manager/create-product/', create_product, name='create_product'), # Создание продукта.
     path('product/<int:id>/<slug:slug>/', product_detail, name='product_detail'),  # Просмотр продукта.
+    path('product/edit/<int:pk>/', edit_product, name='edit_product'),  # Редактирование продукта.
     path('manager/delete-products/', delete_products, name='delete_products'), # Удаление продукта.
     path('manager/deactivate-products/', deactivate_products, name='deactivate_products'),
     path('products/', product_list, name='product_list'), # Список продуктов

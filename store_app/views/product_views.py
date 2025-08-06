@@ -1,8 +1,9 @@
 # Список товаров / Детали товара / Создание товара
 from django.shortcuts import render, get_object_or_404, redirect
-
+from django.contrib.auth.decorators import login_required
 from ..forms.create_product_form import CreatProductForm
 from ..models import Product, Category
+from django.contrib import messages
 
 
 def create_product(request):
@@ -106,3 +107,26 @@ def product_detail(request, id, slug):
     else:
         product = get_object_or_404(Product, id=id, slug=slug, available=True)
     return render(request, 'view_product.html', {'product': product})
+
+
+@login_required
+def edit_product(request, pk):
+    """Редактирование существующего товара"""
+    if request.user.role != 'MANAGER':
+        return redirect('login')
+
+    product = get_object_or_404(Product, pk=pk)
+
+    if request.method == 'POST':
+        form = CreatProductForm(request.POST, request.FILES, instance=product)
+        if form.is_valid():
+            updated_product = form.save()
+            messages.success(request, f'Товар "{updated_product.name}" успешно обновлен!')
+            return redirect('product_detail', id=updated_product.id, slug=updated_product.slug)
+    else:
+        form = CreatProductForm(instance=product)
+
+    return render(request, 'edit_product.html', {
+        'form': form,
+        'product': product
+    })
