@@ -33,7 +33,7 @@
                     </div>
                     {% endif %}
 
-                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+                    <form method="post" enctype="multipart/form-data" class="needs-validation" novalidate id="product-form">
                         {% csrf_token %}
 
                         {% if form.non_field_errors %}
@@ -50,7 +50,7 @@
                                 <div class="form-floating mb-3">
                                     <input type="text" class="form-control" id="product_name"
                                            name="{{ form.name.name }}"
-                                           value="{{ form.name.value|default:'' }}"
+                                           value="{% if not success_message %}{{ form.name.value|default:'' }}{% endif %}"
                                            required>
                                     <label for="product_name">Название товара *</label>
                                     {% if form.name.errors %}
@@ -68,7 +68,7 @@
                                 <div class="form-floating mb-3">
                                     <input type="number" class="form-control" id="product_price"
                                            name="{{ form.price.name }}"
-                                           value="{{ form.price.value|default:'' }}"
+                                           value="{% if not success_message %}{{ form.price.value|default:'' }}{% endif %}"
                                            step="0.01" min="0" required>
                                     <label for="product_price">Цена *</label>
                                     {% if form.price.errors %}
@@ -88,7 +88,7 @@
                                             name="{{ form.category.name }}" required>
                                         {% for value, label in form.category.field.choices %}
                                             <option value="{{ value }}"
-                                                {% if form.category.value == value %}selected{% endif %}>
+                                                {% if not success_message and form.category.value == value %}selected{% endif %}>
                                                 {{ label }}
                                             </option>
                                         {% endfor %}
@@ -111,7 +111,7 @@
                                             name="{{ form.store.name }}" required>
                                         {% for value, label in form.store.field.choices %}
                                             <option value="{{ value }}"
-                                                {% if form.store.value == value %}selected{% endif %}>
+                                                {% if not success_message and form.store.value == value %}selected{% endif %}>
                                                 {{ label }}
                                             </option>
                                         {% endfor %}
@@ -154,7 +154,7 @@
                                 <div class="form-floating mb-3">
                                     <input type="url" class="form-control" id="product_external_url"
                                            name="{{ form.external_url.name }}"
-                                           value="{{ form.external_url.value|default:'' }}"
+                                           value="{% if not success_message %}{{ form.external_url.value|default:'' }}{% endif %}"
                                            placeholder="https://example.com">
                                     <label for="product_external_url">Ссылка на товар (необязательно)</label>
                                     {% if form.external_url.errors %}
@@ -172,7 +172,7 @@
                                 <div class="form-floating mb-3">
                                     <textarea class="form-control" id="product_description"
                                               name="{{ form.description.name }}"
-                                              style="height: 150px">{{ form.description.value|default:'' }}</textarea>
+                                              style="height: 150px">{% if not success_message %}{{ form.description.value|default:'' }}{% endif %}</textarea>
                                     <label for="product_description">Описание товара</label>
                                     {% if form.description.errors %}
                                     <div class="invalid-feedback d-block">
@@ -189,7 +189,7 @@
                                 <div class="form-check form-switch mb-4">
                                     <input type="checkbox" class="form-check-input" id="product_available"
                                            name="{{ form.available.name }}"
-                                           {% if form.available.value %}checked{% endif %}>
+                                           {% if not success_message and form.available.value %}checked{% endif %}>
                                     <label class="form-check-label" for="product_available">
                                         Товар доступен для продажи
                                     </label>
@@ -272,27 +272,46 @@
 </style>
 
 <script>
-    // Показ имени выбранного файла
-    document.getElementById('product_image').addEventListener('change', function(e) {
-        var fileName = e.target.files[0]?.name || "Файл не выбран";
-        var label = e.target.nextElementSibling;
-        label.querySelector('i').className = "fas fa-file-image";
-
-        // Удаляем предыдущее имя файла, если есть
-        var existingFileName = label.querySelector('.file-name');
-        if (existingFileName) {
-            existingFileName.remove();
-        }
-
-        // Добавляем новое имя файла
-        var fileNameSpan = document.createElement('span');
-        fileNameSpan.className = 'file-name ms-2';
-        fileNameSpan.textContent = fileName;
-        label.appendChild(fileNameSpan);
-    });
-
-    // Валидация формы
+    // Очистка формы после успешного создания товара
     document.addEventListener('DOMContentLoaded', function() {
+        {% if success_message %}
+            // Очищаем все поля формы
+            document.getElementById('product-form').reset();
+
+            // Очищаем имя файла в загрузчике изображений
+            const fileInput = document.getElementById('product_image');
+            const fileLabel = fileInput.nextElementSibling;
+
+            // Удаляем отображение имени файла, если есть
+            const fileNameSpan = fileLabel.querySelector('.file-name');
+            if (fileNameSpan) {
+                fileNameSpan.remove();
+            }
+
+            // Восстанавливаем иконку загрузки
+            fileLabel.querySelector('i').className = "fas fa-upload";
+        {% endif %}
+
+        // Показ имени выбранного файла
+        document.getElementById('product_image').addEventListener('change', function(e) {
+            var fileName = e.target.files[0]?.name || "Файл не выбран";
+            var label = e.target.nextElementSibling;
+            label.querySelector('i').className = "fas fa-file-image";
+
+            // Удаляем предыдущее имя файла, если есть
+            var existingFileName = label.querySelector('.file-name');
+            if (existingFileName) {
+                existingFileName.remove();
+            }
+
+            // Добавляем новое имя файла
+            var fileNameSpan = document.createElement('span');
+            fileNameSpan.className = 'file-name ms-2';
+            fileNameSpan.textContent = fileName;
+            label.appendChild(fileNameSpan);
+        });
+
+        // Валидация формы
         var forms = document.querySelectorAll('.needs-validation');
 
         Array.prototype.slice.call(forms).forEach(function(form) {
