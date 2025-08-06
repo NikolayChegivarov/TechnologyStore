@@ -90,6 +90,13 @@
                             <i class="fas fa-home"></i> Главная
                         </a>
                     </li>
+                    {% if user.is_authenticated and user.role == 'MANAGER' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'manager_dashboard' %}">
+                            <i class="fas fa-tachometer-alt"></i> Интерфейс менеджера
+                        </a>
+                    </li>
+                    {% endif %}
                 </ul>
 
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
