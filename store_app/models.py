@@ -237,7 +237,8 @@ class User(AbstractUser):  # Пользователь
     )
 
     def save(self, *args, **kwargs):
-        creating = not self.pk
+        if not self.pk or 'password' in kwargs:  # Если пользователь новый или пароль изменён
+            self.set_password(self.password)  # Хеширует пароль
         super().save(*args, **kwargs)
 
         if self.role == User.Role.MANAGER and self.manager_profile:
@@ -381,3 +382,56 @@ class OrderItem(models.Model):  # Элемент заказа
         indexes = [
             models.Index(fields=['order', 'product']),
         ]
+
+
+class ActionLog(models.Model):
+    ACTION_TYPES = [
+        ('CREATE', 'Создание товара'),
+        ('EDIT', 'Редактирование товара'),
+        ('DELETE', 'Удаление товара'),
+        ('DEACTIVATE', 'Снятие с продажи'),
+    ]
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name="Менеджер"
+    )
+    action_type = models.CharField(
+        max_length=20,
+        choices=ACTION_TYPES,
+        verbose_name="Тип действия"
+    )
+    product_name = models.CharField(
+        max_length=255,
+        verbose_name="Название товара"
+    )
+    product_id = models.IntegerField(
+        verbose_name="ID товара",
+        null=True,
+        blank=True
+    )
+    timestamp = models.DateTimeField(
+        default=timezone.now,
+        verbose_name="Дата и время"
+    )
+    changed_fields = models.JSONField(
+        default=dict,
+        blank=True,
+        null=True,
+        verbose_name="Изменённые поля (JSON)"
+    )
+    details = models.TextField(
+        blank=True,
+        null=True,
+        verbose_name="Дополнительная информация"
+    )
+
+    class Meta:
+        verbose_name = "Лог действий"
+        verbose_name_plural = "Логи действий"
+        ordering = ['-timestamp']
+
+    def __str__(self):
+        return f"{self.user} {self.get_action_type_display()} {self.product_name}"

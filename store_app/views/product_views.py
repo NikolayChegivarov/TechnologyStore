@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from ..forms.create_product_form import CreatProductForm
-from ..models import Product, Category
+from ..models import Product, Category, ActionLog
 from django.contrib import messages
 
 
@@ -109,18 +109,45 @@ def product_detail(request, id, slug):
     return render(request, 'view_product.html', {'product': product})
 
 
-@login_required
 def edit_product(request, pk):
-    """Редактирование существующего товара"""
     if request.user.role != 'MANAGER':
         return redirect('login')
 
     product = get_object_or_404(Product, pk=pk)
+    old_values = {
+        'name': product.name,
+        'price': str(product.price),
+        'available': product.available,
+        'description': product.description,
+        # Добавьте другие поля, если нужно
+    }
 
     if request.method == 'POST':
         form = CreatProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             updated_product = form.save()
+
+            # Сравниваем старые и новые значения
+            changed_fields = {}
+            for field in ['name', 'price', 'available', 'description']:
+                old_value = old_values[field]
+                new_value = str(getattr(updated_product, field))
+                if old_value != new_value:
+                    changed_fields[field] = {
+                        'old': old_value,
+                        'new': new_value
+                    }
+
+            # Логирование
+            ActionLog.objects.create(
+                user=request.user,
+                action_type='EDIT',
+                product_name=updated_product.name,
+                product_id=updated_product.id,
+                changed_fields=changed_fields,
+                details=f"Изменены поля: {', '.join(changed_fields.keys())}"
+            )
+
             messages.success(request, f'Товар "{updated_product.name}" успешно обновлен!')
             return redirect('product_detail', id=updated_product.id, slug=updated_product.slug)
     else:

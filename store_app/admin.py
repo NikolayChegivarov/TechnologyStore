@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Manager, Store, Category
+from .models import User, Manager, Store, Category, ActionLog
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -108,6 +108,25 @@ class CustomUserAdmin(UserAdmin):
                 )
                 obj.manager_profile = manager
                 obj.save()
+
+
+@admin.register(ActionLog)
+class ActionLogAdmin(admin.ModelAdmin):
+    list_display = ('user', 'action_type', 'product_name', 'product_id', 'timestamp', 'format_changed_fields')
+    list_filter = ('action_type', 'user', 'timestamp')
+    search_fields = ('product_name', 'user__username')
+    readonly_fields = ('timestamp', 'changed_fields')
+    date_hierarchy = 'timestamp'
+
+    def format_changed_fields(self, obj):
+        if not obj.changed_fields:
+            return "-"
+        return ", ".join([
+            f"{field}: {values['old']} → {values['new']}"
+            for field, values in obj.changed_fields.items()
+        ])
+    format_changed_fields.short_description = "Изменённые поля"
+
 
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Store, StoreAdmin)

@@ -159,3 +159,21 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Путь к папке media
 # Настройки CSRF
 CSRF_COOKIE_SECURE = False  # Для разработки
 CSRF_COOKIE_HTTPONLY = False  # Для AJAX-запросов
+
+
+# Логирование попыток входа
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'django.contrib.auth': {
+            'handlers': ['console'],
+            'level': 'DEBUG',
+        },
+    },
+}
