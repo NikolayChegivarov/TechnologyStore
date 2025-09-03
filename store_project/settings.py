@@ -146,6 +146,9 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'store_app/static'),
 ]
 
+MEDIA_URL = '/media/'  # URL-префикс для медиа-файлов
+MEDIA_ROOT = os.path.join(BASE_DIR, 'store_app/media')  # Путь к папке media
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
@@ -158,9 +161,6 @@ AUTH_USER_MODEL = 'store_app.User'
 AUTHENTICATION_BACKENDS = [
     'store_app.auth_backends.RoleBasedAuthBackend',
 ]
-
-MEDIA_URL = '/media/'  # URL-префикс для медиа-файлов
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Путь к папке media
 
 # Настройки CSRF
 CSRF_COOKIE_SECURE = False  # Для разработки
