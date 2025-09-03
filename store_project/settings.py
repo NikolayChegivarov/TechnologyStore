@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-dj6u$!i+++i7#-ui2wsldrq#8l(f2!&e5q892k1s7#m6sy*g7+
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'gadgetia.ru/',
+    'gadgetia.ru',
     '45.80.70.62',
     'localhost',
     '127.0.0.1',
