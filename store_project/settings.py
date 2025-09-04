@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-dj6u$!i+++i7#-ui2wsldrq#8l(f2!&e5q892k1s7#m6sy*g7+'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-dj6u$!i+++i7#-ui2wsldrq#8l(f2!&e5q892k1s7#m6sy*g7+')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -88,7 +88,7 @@ WSGI_APPLICATION = 'store_project.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 # Проверка доступности переменных окружения
-required_env_vars = ['NAME_DB', 'USER_DB', 'PASSWORD_DB']
+required_env_vars = ['NAME_DB', 'USER_DB', 'PASSWORD_DB', 'SECRET_KEY']
 missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 
 if missing_vars:
@@ -140,6 +140,8 @@ USE_TZ = False               # Отключаем поддержку часов�
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
