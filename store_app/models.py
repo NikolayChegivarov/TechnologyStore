@@ -160,7 +160,7 @@ class Customer(models.Model):  # Покупатель
         blank=True,
         verbose_name="Адрес",
         validators=[RegexValidator(
-            regex='^[а-яА-ЯёЁ0-9\s.,-]+$',
+            regex=r'^[а-яА-ЯёЁ0-9\s.,-]+$',
             message='Допустимы русские буквы, цифры, пробелы и знаки .,-'
         )]
     )
