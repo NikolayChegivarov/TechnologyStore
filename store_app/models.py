@@ -237,10 +237,12 @@ class User(AbstractUser):  # Пользователь
     )
 
     def save(self, *args, **kwargs):
-        if not self.pk or 'password' in kwargs:  # Если пользователь новый или пароль изменён
-            self.set_password(self.password)  # Хеширует пароль
+        # Хешируем пароль только если он не хеширован
+        if self.password and not self.password.startswith('pbkdf2_sha256$'):
+            self.set_password(self.password)
         super().save(*args, **kwargs)
 
+        # Перенесем логику обновления менеджера в отдельный блок
         if self.role == User.Role.MANAGER and self.manager_profile:
             self.manager_profile.first_name = self.first_name
             self.manager_profile.last_name = self.last_name
