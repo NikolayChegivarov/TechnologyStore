@@ -186,3 +186,17 @@ LOGGING = {
         },
     },
 }
+
+# Тема для админки
+JAZZMIN_SETTINGS = {
+    "site_title": "Gadgetia Admin",
+    "site_header": "Gadgetia",
+    "site_brand": "Gadgetia Administration",
+    "welcome_sign": "Добро пожаловать в админ-панель Gadgetia",
+    "site_logo": "store_app/static/logo.png",
+    "theme": "darkly",
+}
+JAZZMIN_UI_TWEAKS = {
+    "theme": "darkly",
+    "dark_mode_theme": "darkly",
+}
