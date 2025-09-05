@@ -42,6 +42,7 @@ ALLOWED_HOSTS = [
 # Application definition
 
 INSTALLED_APPS = [
+    'jazzmin',  # Что бы админка была краше.
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
