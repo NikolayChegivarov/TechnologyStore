@@ -103,7 +103,7 @@ class CustomUserAdmin(UserAdmin):
                     first_name=obj.first_name,
                     last_name=obj.last_name,
                     phone='',  # можно установить значение по умолчанию
-                    position='Менеджер',  # или оставить пустым
+                    position='MANAGER',  # или оставить пустым
                     is_active=True
                 )
                 obj.manager_profile = manager
