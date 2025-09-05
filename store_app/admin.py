@@ -82,32 +82,24 @@ class CustomUserAdmin(UserAdmin):
         return form
 
     def save_model(self, request, obj, form, change):
-        """Дублирует созданного пользователя в объект MANAGER"""
+        """Создает профиль менеджера при необходимости"""
         # При сохранении суперпользователя устанавливаем роль ADMIN
         if obj.is_superuser:
             obj.role = User.Role.ADMIN
 
         super().save_model(request, obj, form, change)
 
-        # Создаем или обновляем профиль менеджера при необходимости
-        if obj.role == User.Role.MANAGER:
-            if obj.manager_profile:
-                # Обновляем существующий профиль менеджера
-                manager = obj.manager_profile
-                manager.first_name = obj.first_name
-                manager.last_name = obj.last_name
-                manager.save()
-            else:
-                # Создаем новый профиль менеджера
-                manager = Manager.objects.create(
-                    first_name=obj.first_name,
-                    last_name=obj.last_name,
-                    phone='',  # можно установить значение по умолчанию
-                    position='MANAGER',  # или оставить пустым
-                    is_active=True
-                )
-                obj.manager_profile = manager
-                obj.save()
+        # Создаем профиль менеджера если его нет
+        if obj.role == User.Role.MANAGER and not obj.manager_profile:
+            manager = Manager.objects.create(
+                first_name=obj.first_name,
+                last_name=obj.last_name,
+                phone='',
+                position='MANAGER',
+                is_active=True
+            )
+            obj.manager_profile = manager
+            obj.save()
 
 
 @admin.register(ActionLog)
