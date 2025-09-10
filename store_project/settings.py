@@ -200,3 +200,6 @@ JAZZMIN_UI_TWEAKS = {
     "theme": "darkly",
     "dark_mode_theme": "darkly",
 }
+
+# Для pytest
+TEST_RUNNER = 'django.test.runner.DiscoverRunner'
