@@ -208,3 +208,89 @@ def manager_user():
             last_name=kwargs.get('last_name', 'User')
         )
     return _create_user
+
+# test_dashboard_views
+# tests/conftest.py (дополнение)
+import pytest
+from django.contrib.auth import get_user_model
+from store_app.models import Store, Category, Product, CustomerProfile, FavoriteProduct
+
+User = get_user_model()
+
+
+@pytest.fixture
+def customer_user(db):
+    """Фикстура для пользователя с ролью CUSTOMER"""
+    user = User.objects.create_user(
+        username='customer',
+        password='testpass123',
+        first_name='Иван',
+        last_name='Петров',
+        role=User.Role.CUSTOMER
+    )
+    CustomerProfile.objects.create(user=user)
+    return user
+
+
+@pytest.fixture
+def manager_user(db):
+    """Фикстура для пользователя с ролью MANAGER"""
+    return User.objects.create_user(
+        username='manager',
+        password='testpass123',
+        first_name='Петр',
+        last_name='Иванов',
+        role=User.Role.MANAGER
+    )
+
+
+@pytest.fixture
+def store(db):
+    """Фикстура для магазина"""
+    return Store.objects.create(
+        name='Test Store',
+        address='Test Address 123',
+        city='Test City',
+        phone='+79999999999'
+    )
+
+
+@pytest.fixture
+def category(db):
+    """Фикстура для категории"""
+    return Category.objects.create(
+        name='Test Category',
+        description='Test Description'
+    )
+
+
+@pytest.fixture
+def product(db, store, category):
+    """Фикстура для товара"""
+    return Product.objects.create(
+        name='Test Product',
+        description='Test Description',
+        price=1000.00,
+        stock_quantity=10,
+        available=True,
+        store=store,
+        category=category
+    )
+
+
+@pytest.fixture
+def product_factory(db, store, category):
+    """Фабрика для создания товаров"""
+    def create_product(**kwargs):
+        defaults = {
+            'name': 'Test Product',
+            'description': 'Test Description',
+            'price': 1000.00,
+            'stock_quantity': 10,
+            'available': True,
+            'store': store,
+            'category': category
+        }
+        defaults.update(kwargs)
+        return Product.objects.create(**defaults)
+    return create_product
