@@ -1,6 +1,9 @@
 import pytest
+import factory
 from django.contrib.auth import get_user_model
-from store_app.models import Store, Category, Manager, Customer, Product
+from django.contrib.auth.hashers import make_password
+from store_app.models import Store, Category, Manager, Customer, Product, User
+
 
 User = get_user_model()
 
@@ -62,3 +65,106 @@ def test_product(db, test_category, test_store, test_manager):
         created_by=test_manager
     )
 
+# test_user_models.py
+@pytest.fixture
+def test_store():
+    """Фикстура для создания тестового магазина"""
+    return Store.objects.create(
+        city="Москва",
+        address="ул. Тестовая, д. 1"
+    )
+
+
+@pytest.fixture
+def test_manager(test_store):
+    """Фикстура для создания тестового менеджера"""
+    return Manager.objects.create(
+        store=test_store,
+        last_name="Иванов",
+        first_name="Петр",
+        middle_name="Сергеевич",
+        phone="+7 999 123 45 67",
+        position="Менеджер по продажам"
+    )
+
+
+@pytest.fixture
+def test_customer():
+    """Фикстура для создания тестового покупателя"""
+    return Customer.objects.create(
+        username="test_customer",
+        last_name="Петров",
+        first_name="Иван",
+        middle_name="Васильевич",
+        email="test@example.com",
+        phone="+7 999 765 43 21",
+        address="ул. Покупательская, д. 10"
+    )
+
+
+@pytest.fixture
+def test_admin_user():
+    """Фикстура для создания тестового пользователя с ролью ADMIN"""
+    return User.objects.create_user(
+        username="admin_user",
+        password="testpass123",
+        first_name="Админ",
+        last_name="Системный",
+        role=User.Role.ADMIN
+    )
+
+
+@pytest.fixture
+def test_manager_user(test_manager):
+    """Фикстура для создания тестового пользователя с ролью MANAGER"""
+    user = User.objects.create_user(
+        username="manager_user",
+        password="testpass123",
+        first_name=test_manager.first_name,
+        last_name=test_manager.last_name,
+        role=User.Role.MANAGER,
+        manager_profile=test_manager
+    )
+    return user
+
+
+@pytest.fixture
+def test_customer_user(test_customer):
+    """Фикстура для создания тестового пользователя с ролью CUSTOMER"""
+    user = User.objects.create_user(
+        username="customer_user",
+        password="testpass123",
+        first_name=test_customer.first_name,
+        last_name=test_customer.last_name,
+        role=User.Role.CUSTOMER,
+        customer_profile=test_customer
+    )
+    return user
+
+# test_auth_views
+@pytest.fixture
+def customer_user(db):
+    return User.objects.create_user(
+        email='customer@test.com',
+        password='testpass123',
+        username='customer_user',
+        role=User.Role.CUSTOMER
+    )
+
+@pytest.fixture
+def manager_user(db):
+    return User.objects.create_user(
+        email='manager@test.com',
+        password='testpass123',
+        username='manager_user',
+        role=User.Role.MANAGER
+    )
+
+@pytest.fixture
+def admin_user(db):
+    return User.objects.create_user(
+        email='admin@test.com',
+        password='testpass123',
+        username='admin_user',
+        role=User.Role.ADMIN
+    )
