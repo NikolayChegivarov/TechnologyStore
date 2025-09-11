@@ -1,5 +1,6 @@
+# pytest tests/test_models/test_product_models.py -v
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -253,7 +254,11 @@ class Product(models.Model):  # Продукт
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='products')
     name = models.CharField(max_length=255, db_index=True)
     description = models.TextField(blank=True)  # описание
-    price = models.DecimalField(max_digits=10, decimal_places=2)  # цена
+    price = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        validators=[MinValueValidator(0.01, message='Цена должна быть положительной')]
+    )  # цена
     available = models.BooleanField(default=True)  # наличие
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='products')  # филиал
     image = models.ImageField(
