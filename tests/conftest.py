@@ -1,9 +1,9 @@
 import pytest
 import factory
+from django.test import Client
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from store_app.models import Store, Category, Manager, Customer, Product, User
-
 
 User = get_user_model()
 
@@ -173,3 +173,38 @@ def admin_user(db):
         role=User.Role.ADMIN
     )
 
+# test_auth_views
+@pytest.fixture
+def client():
+    """Фикстура для Django test client"""
+    return Client()
+
+
+@pytest.fixture
+def customer_user():
+    """Фикстура для создания тестового пользователя-клиента"""
+    def _create_user(**kwargs):
+        return User.objects.create_user(
+            username=kwargs.get('username', 'testuser'),
+            email=kwargs.get('email', 'test@example.com'),
+            password=kwargs.get('password', 'testpass123'),
+            role=User.Role.CUSTOMER,
+            first_name=kwargs.get('first_name', 'Test'),
+            last_name=kwargs.get('last_name', 'User')
+        )
+    return _create_user
+
+
+@pytest.fixture
+def manager_user():
+    """Фикстура для создания тестового пользователя-менеджера"""
+    def _create_user(**kwargs):
+        return User.objects.create_user(
+            username=kwargs.get('username', 'manager'),
+            email=kwargs.get('email', 'manager@example.com'),
+            password=kwargs.get('password', 'testpass123'),
+            role=User.Role.MANAGER,
+            first_name=kwargs.get('first_name', 'Manager'),
+            last_name=kwargs.get('last_name', 'User')
+        )
+    return _create_user
