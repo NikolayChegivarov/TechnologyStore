@@ -141,9 +141,11 @@ def test_customer_user(test_customer):
     )
     return user
 
+
 # test_auth_views
 @pytest.fixture
 def customer_user(db):
+    """Фикстура создания тестового пользователя с ролью CUSTOMER"""
     return User.objects.create_user(
         email='customer@test.com',
         password='testpass123',
@@ -153,6 +155,7 @@ def customer_user(db):
 
 @pytest.fixture
 def manager_user(db):
+    """Фикстура создания тестового пользователя с ролью MANAGER"""
     return User.objects.create_user(
         email='manager@test.com',
         password='testpass123',
@@ -162,9 +165,11 @@ def manager_user(db):
 
 @pytest.fixture
 def admin_user(db):
+    """Фикстура создания тестового пользователя с ролью ADMIN"""
     return User.objects.create_user(
         email='admin@test.com',
         password='testpass123',
         username='admin_user',
         role=User.Role.ADMIN
     )
+
