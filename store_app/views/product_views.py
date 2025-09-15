@@ -1,7 +1,7 @@
 # Список товаров / Детали товара / Создание товара
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from ..forms.create_product_form import CreatProductForm
+from ..forms.create_product_form import CreateProductForm
 from ..models import Product, Category, ActionLog
 from django.contrib import messages
 
@@ -27,7 +27,7 @@ def create_product(request):
     created_product = None
 
     if request.method == 'POST':
-        form = CreatProductForm(request.POST, request.FILES)
+        form = CreateProductForm(request.POST, request.FILES)
         if form.is_valid():
             product = form.save(commit=False)
             product.created_by = request.user.manager_profile
@@ -42,7 +42,7 @@ def create_product(request):
             created_product = product
             # Не делаем редирект, а рендерим ту же страницу с сообщением
     else:
-        form = CreatProductForm()
+        form = CreateProductForm()
 
     context = {
         'form': form,
@@ -123,7 +123,7 @@ def edit_product(request, pk):
     }
 
     if request.method == 'POST':
-        form = CreatProductForm(request.POST, request.FILES, instance=product)
+        form = CreateProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             updated_product = form.save()
 
@@ -151,7 +151,7 @@ def edit_product(request, pk):
             messages.success(request, f'Товар "{updated_product.name}" успешно обновлен!')
             return redirect('product_detail', id=updated_product.id, slug=updated_product.slug)
     else:
-        form = CreatProductForm(instance=product)
+        form = CreateProductForm(instance=product)
 
     return render(request, 'edit_product.html', {
         'form': form,
