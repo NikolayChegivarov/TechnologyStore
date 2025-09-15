@@ -8,7 +8,8 @@ class CreateProductForm(forms.ModelForm):
     external_url = forms.URLField(
         required=False,
         assume_scheme='https',  # Добавляем параметр здесь
-        widget=forms.URLInput(attrs={'placeholder': 'https://example.com'})
+        widget=forms.URLInput(attrs={'placeholder': 'https://example.com'}),
+        label='Ссылка на товар'  # ДОБАВЬТЕ ЭТУ СТРОКУ
     )
 
     class Meta:
@@ -29,7 +30,7 @@ class CreateProductForm(forms.ModelForm):
             'available': 'Доступен для продажи',
             'store': 'Магазин',
             'image': 'Фотография товара',
-            'external_url': 'Ссылка на товар'
+            # УБЕРИТЕ external_url отсюда, так как он уже определен выше
         }
 
     def __init__(self, *args, **kwargs):
