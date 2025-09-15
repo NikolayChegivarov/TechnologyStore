@@ -3,7 +3,7 @@ import pytest
 from django.urls import reverse
 from django.test import RequestFactory
 from store_app.models import Product, Store, Category, FavoriteProduct
-from store_app.views.dashboard_views import customer_dashboard, manager_dashboard, home, get_stores_by_city
+from store_app.views.dashboard_views import manager_dashboard, home, get_stores_by_city
 
 
 @pytest.mark.django_db

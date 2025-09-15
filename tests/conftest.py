@@ -213,23 +213,9 @@ def manager_user():
 # tests/conftest.py (дополнение)
 import pytest
 from django.contrib.auth import get_user_model
-from store_app.models import Store, Category, Product, CustomerProfile, FavoriteProduct
+from store_app.models import Store, Category, Product, FavoriteProduct
 
 User = get_user_model()
-
-
-@pytest.fixture
-def customer_user(db):
-    """Фикстура для пользователя с ролью CUSTOMER"""
-    user = User.objects.create_user(
-        username='customer',
-        password='testpass123',
-        first_name='Иван',
-        last_name='Петров',
-        role=User.Role.CUSTOMER
-    )
-    CustomerProfile.objects.create(user=user)
-    return user
 
 
 @pytest.fixture
