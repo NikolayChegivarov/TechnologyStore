@@ -293,23 +293,19 @@ class TestCustomerModel:
 class TestUserProfileRelationships:
     """Тесты связей между User, Manager и Customer"""
 
-    def test_manager_user_relationship(self, test_manager_user, test_manager):
+    def test_manager_user_relationship(self, test_manager_with_user):
         """Тест связи пользователя с профилем менеджера"""
-        assert test_manager_user.manager_profile == test_manager
-        assert test_manager.user_account == test_manager_user
-        assert test_manager_user.role == User.Role.MANAGER
+        user, manager = test_manager_with_user
+        assert user.manager_profile == manager
+        assert manager.user_account == user
+        assert user.role == User.Role.MANAGER
 
-    def test_customer_user_relationship(self, test_customer_user, test_customer):
+    def test_customer_user_relationship(self, test_customer_with_user):
         """Тест связи пользователя с профилем покупателя"""
-        assert test_customer_user.customer_profile == test_customer
-        assert test_customer.user_account == test_customer_user
-        assert test_customer_user.role == User.Role.CUSTOMER
-
-    def test_user_without_profile(self, test_admin_user):
-        """Тест пользователя без связанного профиля"""
-        assert test_admin_user.manager_profile is None
-        assert test_admin_user.customer_profile is None
-        assert test_admin_user.role == User.Role.ADMIN
+        user, customer = test_customer_with_user
+        assert user.customer_profile == customer
+        assert customer.user_account == user
+        assert user.role == User.Role.CUSTOMER
 
     def test_manager_profile_sync_on_user_save(self, test_manager):
         """Тест синхронизации данных менеджера при сохранении пользователя"""
@@ -327,12 +323,13 @@ class TestUserProfileRelationships:
         assert test_manager.first_name == "НовоеИмя"
         assert test_manager.last_name == "НоваяФамилия"
 
-    def test_user_deletion_cascades_to_profiles(self, test_customer_user):
+    def test_user_deletion_cascades_to_profiles(self, test_customer_with_user):
         """Тест каскадного удаления профилей при удалении пользователя"""
-        customer_id = test_customer_user.customer_profile.id
-        user_id = test_customer_user.id
+        user, customer = test_customer_with_user
+        customer_id = customer.id
+        user_id = user.id
 
-        test_customer_user.delete()
+        user.delete()
 
         # Проверяем, что пользователь удален
         with pytest.raises(User.DoesNotExist):

@@ -25,33 +25,6 @@ def test_category(db):
         slug="smartfony"
     )
 
-
-@pytest.fixture
-def test_manager(db, test_store):
-    """Фикстура для создания тестового менеджера"""
-    return Manager.objects.create(
-        store=test_store,
-        last_name="Иванов",
-        first_name="Иван",
-        middle_name="Иванович",
-        phone="+7 999 999 99 99",
-        position="Менеджер"
-    )
-
-
-@pytest.fixture
-def test_customer(db):
-    """Фикстура для создания тестового покупателя"""
-    return Customer.objects.create(
-        username="test_customer",
-        last_name="Петров",
-        first_name="Петр",
-        middle_name="Петрович",
-        email="test@example.com",
-        phone="+7 888 888 88 88"
-    )
-
-
 @pytest.fixture
 def test_product(db, test_category, test_store, test_manager):
     """Фикстура для создания тестового продукта"""
@@ -65,41 +38,106 @@ def test_product(db, test_category, test_store, test_manager):
         created_by=test_manager
     )
 
-# test_user_models.py
-@pytest.fixture
-def test_store():
-    """Фикстура для создания тестового магазина"""
-    return Store.objects.create(
-        city="Москва",
-        address="ул. Тестовая, д. 1"
-    )
-
 
 @pytest.fixture
-def test_manager(test_store):
-    """Фикстура для создания тестового менеджера"""
+def test_manager(db, test_store):
+    """Фикстура для создания тестового МЕНЕДЖЕРА"""
     return Manager.objects.create(
         store=test_store,
         last_name="Иванов",
-        first_name="Петр",
-        middle_name="Сергеевич",
-        phone="+7 999 123 45 67",
-        position="Менеджер по продажам"
+        first_name="Иван",
+        middle_name="Иванович",
+        phone="+7 999 999 99 99",
+        position="Менеджер"
     )
 
 
 @pytest.fixture
-def test_customer():
-    """Фикстура для создания тестового покупателя"""
+def test_customer(db):
+    """Фикстура для создания тестового ПОКУПАТЕЛЯ"""
     return Customer.objects.create(
         username="test_customer",
         last_name="Петров",
-        first_name="Иван",
-        middle_name="Васильевич",
+        first_name="Петр",
+        middle_name="Петрович",
         email="test@example.com",
-        phone="+7 999 765 43 21",
-        address="ул. Покупательская, д. 10"
+        phone="+7 888 888 88 88"
     )
+
+
+@pytest.fixture
+def test_manager_with_user(db, test_store):
+    """Фикстура для создания User со статусом Manager"""
+    # Сначала создаем менеджера
+    manager = Manager.objects.create(
+        store=test_store,
+        last_name="Иванов",
+        first_name="Иван",
+        middle_name="Иванович",
+        phone="+7 999 999 99 99",
+        position="Менеджер"
+    )
+
+    # Затем создаем пользователя с ссылкой на менеджера
+    user = User.objects.create_user(
+        username="test_manager",
+        email="manager@example.com",
+        password="testpass123",
+        role=User.Role.MANAGER,
+        first_name="Иван",
+        last_name="Иванов",
+        manager_profile=manager  # Устанавливаем связь
+    )
+    return user, manager
+
+
+@pytest.fixture
+def test_customer_with_user(db):
+    """Фикстура для создания User со статусом Customer"""
+    # Сначала создаем покупателя
+    customer = Customer.objects.create(
+        username="test_customer",
+        last_name="Петров",
+        first_name="Петр",
+        middle_name="Петрович",
+        email="test@example.com",
+        phone="+7 888 888 88 88"
+    )
+
+    # Затем создаем пользователя с ссылкой на покупателя
+    user = User.objects.create_user(
+        username="test_customer",
+        email="customer@example.com",
+        password="testpass123",
+        role=User.Role.CUSTOMER,
+        first_name="Петр",
+        last_name="Петров",
+        customer_profile=customer  # Устанавливаем связь
+    )
+    return user, customer
+
+
+# @pytest.fixture
+# def test_customer(db):
+#     """Фикстура для создания тестового покупателя с пользователем"""
+#     user = User.objects.create_user(
+#         username="test_customer",
+#         email="test@example.com",
+#         password="testpass123",
+#         role=User.Role.CUSTOMER,
+#         first_name="Петр",
+#         last_name="Петров"
+#     )
+#     customer = Customer.objects.create(
+#         username="test_customer",
+#         last_name="Петров",
+#         first_name="Петр",
+#         middle_name="Петрович",
+#         email="test@example.com",
+#         phone="+7 888 888 88 88",
+#         user_account=user  # Связываем с пользователем
+#     )
+#     return customer
 
 
 @pytest.fixture
@@ -114,169 +152,8 @@ def test_admin_user():
     )
 
 
-@pytest.fixture
-def test_manager_user(test_manager):
-    """Фикстура для создания тестового пользователя с ролью MANAGER"""
-    user = User.objects.create_user(
-        username="manager_user",
-        password="testpass123",
-        first_name=test_manager.first_name,
-        last_name=test_manager.last_name,
-        role=User.Role.MANAGER,
-        manager_profile=test_manager
-    )
-    return user
-
-
-@pytest.fixture
-def test_customer_user(test_customer):
-    """Фикстура для создания тестового пользователя с ролью CUSTOMER"""
-    user = User.objects.create_user(
-        username="customer_user",
-        password="testpass123",
-        first_name=test_customer.first_name,
-        last_name=test_customer.last_name,
-        role=User.Role.CUSTOMER,
-        customer_profile=test_customer
-    )
-    return user
-
-
-# test_auth_views
-@pytest.fixture
-def customer_user(db):
-    """Фикстура создания тестового пользователя с ролью CUSTOMER"""
-    return User.objects.create_user(
-        email='customer@test.com',
-        password='testpass123',
-        username='customer_user',
-        role=User.Role.CUSTOMER
-    )
-
-@pytest.fixture
-def manager_user(db):
-    """Фикстура создания тестового пользователя с ролью MANAGER"""
-    return User.objects.create_user(
-        email='manager@test.com',
-        password='testpass123',
-        username='manager_user',
-        role=User.Role.MANAGER
-    )
-
-@pytest.fixture
-def admin_user(db):
-    """Фикстура создания тестового пользователя с ролью ADMIN"""
-    return User.objects.create_user(
-        email='admin@test.com',
-        password='testpass123',
-        username='admin_user',
-        role=User.Role.ADMIN
-    )
-
 # test_auth_views
 @pytest.fixture
 def client():
     """Фикстура для Django test client"""
     return Client()
-
-
-@pytest.fixture
-def customer_user():
-    """Фикстура для создания тестового пользователя-клиента"""
-    def _create_user(**kwargs):
-        return User.objects.create_user(
-            username=kwargs.get('username', 'testuser'),
-            email=kwargs.get('email', 'test@example.com'),
-            password=kwargs.get('password', 'testpass123'),
-            role=User.Role.CUSTOMER,
-            first_name=kwargs.get('first_name', 'Test'),
-            last_name=kwargs.get('last_name', 'User')
-        )
-    return _create_user
-
-
-@pytest.fixture
-def manager_user():
-    """Фикстура для создания тестового пользователя-менеджера"""
-    def _create_user(**kwargs):
-        return User.objects.create_user(
-            username=kwargs.get('username', 'manager'),
-            email=kwargs.get('email', 'manager@example.com'),
-            password=kwargs.get('password', 'testpass123'),
-            role=User.Role.MANAGER,
-            first_name=kwargs.get('first_name', 'Manager'),
-            last_name=kwargs.get('last_name', 'User')
-        )
-    return _create_user
-
-# test_dashboard_views
-# tests/conftest.py (дополнение)
-import pytest
-from django.contrib.auth import get_user_model
-from store_app.models import Store, Category, Product, FavoriteProduct
-
-User = get_user_model()
-
-
-@pytest.fixture
-def manager_user(db):
-    """Фикстура для пользователя с ролью MANAGER"""
-    return User.objects.create_user(
-        username='manager',
-        password='testpass123',
-        first_name='Петр',
-        last_name='Иванов',
-        role=User.Role.MANAGER
-    )
-
-
-@pytest.fixture
-def store(db):
-    """Фикстура для магазина"""
-    return Store.objects.create(
-        name='Test Store',
-        address='Test Address 123',
-        city='Test City',
-        phone='+79999999999'
-    )
-
-
-@pytest.fixture
-def category(db):
-    """Фикстура для категории"""
-    return Category.objects.create(
-        name='Test Category',
-        description='Test Description'
-    )
-
-
-@pytest.fixture
-def product(db, store, category):
-    """Фикстура для товара"""
-    return Product.objects.create(
-        name='Test Product',
-        description='Test Description',
-        price=1000.00,
-        stock_quantity=10,
-        available=True,
-        store=store,
-        category=category
-    )
-
-
-@pytest.fixture
-def product_factory(db, store, category):
-    """Фабрика для создания товаров"""
-    def create_product(**kwargs):
-        defaults = {
-            'name': 'Test Product',
-            'description': 'Test Description',
-            'price': 1000.00,
-            'stock_quantity': 10,
-            'available': True,
-            'store': store,
-            'category': category
-        }
-        defaults.update(kwargs)
-        return Product.objects.create(**defaults)
-    return create_product

@@ -2,7 +2,7 @@
 import pytest
 from django.urls import reverse
 from django.test import RequestFactory
-from store_app.models import Product, Store, Category, FavoriteProduct
+from store_app.models import Product, Store, Category, FavoriteProduct, User
 from store_app.views.dashboard_views import manager_dashboard, home, get_stores_by_city
 
 
@@ -14,11 +14,12 @@ class TestCustomerDashboard:
         """Тест что customer_dashboard требует аутентификации"""
         response = client.get(reverse('customer_dashboard'))
         assert response.status_code == 302
-        assert response.url.startswith('/auth/login/')
+        assert response.url.startswith('/login/')  # Изменено с /auth/login/ на /login/
 
-    def test_customer_dashboard_authenticated(self, client, customer_user):
+    def test_customer_dashboard_authenticated(self, client, test_customer_with_user):
         """Тест customer_dashboard для аутентифицированного пользователя"""
-        client.force_login(customer_user)
+        user, customer = test_customer_with_user
+        client.force_login(user)
         response = client.get(reverse('customer_dashboard'))
         assert response.status_code == 200
         assert 'dashboard/customer.html' in [t.name for t in response.templates]
@@ -32,25 +33,27 @@ class TestManagerDashboard:
         """Тест что manager_dashboard требует аутентификации"""
         response = client.get(reverse('manager_dashboard'))
         assert response.status_code == 302
-        assert response.url.startswith('/auth/login/')
+        assert response.url.startswith('/login/')  # Изменено с /auth/login/ на /login/
 
-    def test_manager_dashboard_authenticated(self, client, manager_user):
+    def test_manager_dashboard_authenticated(self, client, test_manager_with_user):
         """Тест manager_dashboard для аутентифицированного менеджера"""
-        client.force_login(manager_user)
+        user, manager = test_manager_with_user
+        client.force_login(user)
         response = client.get(reverse('manager_dashboard'))
         assert response.status_code == 200
         assert 'dashboard/manager.html' in [t.name for t in response.templates]
 
-    def test_manager_dashboard_filtering(self, client, manager_user, store, category):
+    def test_manager_dashboard_filtering(self, client, test_manager_with_user, test_store, test_category):
         """Тест фильтрации товаров в manager_dashboard"""
-        client.force_login(manager_user)
+        user, manager = test_manager_with_user
+        client.force_login(user)
 
         # Тест фильтра по магазину
-        response = client.get(f"{reverse('manager_dashboard')}?store={store.id}")
+        response = client.get(f"{reverse('manager_dashboard')}?store={test_store.id}")
         assert response.status_code == 200
 
         # Тест фильтра по категории
-        response = client.get(f"{reverse('manager_dashboard')}?category={category.id}")
+        response = client.get(f"{reverse('manager_dashboard')}?category={test_category.id}")
         assert response.status_code == 200
 
         # Тест сортировки
@@ -68,56 +71,81 @@ class TestHomeView:
         assert response.status_code == 200
         assert 'home.html' in [t.name for t in response.templates]
 
-    def test_home_view_with_filters(self, client, store, category):
+    def test_home_view_with_filters(self, client, test_store, test_category):
         """Тест home view с фильтрами"""
         # Тест фильтра по городу
-        response = client.get(f"{reverse('home')}?city={store.city}")
+        response = client.get(f"{reverse('home')}?city={test_store.city}")
         assert response.status_code == 200
 
         # Тест фильтра по магазину
-        response = client.get(f"{reverse('home')}?store={store.id}")
+        response = client.get(f"{reverse('home')}?store={test_store.id}")
         assert response.status_code == 200
 
         # Тест фильтра по категории
-        response = client.get(f"{reverse('home')}?category={category.id}")
+        response = client.get(f"{reverse('home')}?category={test_category.id}")
         assert response.status_code == 200
 
-    def test_home_view_random_products(self, client, product_factory):
+    def test_home_view_random_products(self, client, test_product):
         """Тест что home view показывает случайные товары без фильтров"""
         # Создаем больше 12 товаров
-        product_factory.create_batch(15, available=True)
+        for i in range(14):
+            Product.objects.create(
+                category=test_product.category,
+                name=f"Тестовый товар {i}",
+                description=f"Описание тестового товара {i}",
+                price=1000 + i * 100,
+                available=True,
+                store=test_product.store,
+                created_by=test_product.created_by
+            )
 
         response = client.get(reverse('home'))
         assert response.status_code == 200
         assert len(response.context['products']) == 12
 
-    def test_home_view_with_favorites(self, client, customer_user, product):
+    def test_home_view_with_favorites(self, client, test_customer_with_user, test_product):
         """Тест home view с избранными товарами для авторизованного пользователя"""
-        client.force_login(customer_user)
+        user, customer = test_customer_with_user
+        client.force_login(user)
 
         # Добавляем товар в избранное
         FavoriteProduct.objects.create(
-            user=customer_user.customer_profile,
-            product=product
+            user=customer,  # Используем customer из кортежа
+            product=test_product
         )
 
         response = client.get(reverse('home'))
         assert response.status_code == 200
-        assert product.id in response.context['user_favorites']
+        assert test_product.id in response.context['user_favorites']
 
+    @pytest.mark.django_db
+    class TestGetStoresByCity:
+        """Тесты для get_stores_by_city view"""
 
-@pytest.mark.django_db
-class TestGetStoresByCity:
-    """Тесты для get_stores_by_city view"""
+        def test_get_stores_by_city(self, client, test_store):
+            """Тест получения магазинов по городу"""
+            # Создаем временного пользователя для теста
+            user = User.objects.create_user(
+                username='test_user',
+                password='testpass123',
+                role=User.Role.CUSTOMER
+            )
+            client.force_login(user)
 
-    def test_get_stores_by_city(self, client, store):
-        """Тест получения магазинов по городу"""
-        response = client.get(f"{reverse('get_stores_by_city')}?city={store.city}")
-        assert response.status_code == 200
-        assert response.json()['stores'][0]['id'] == store.id
+            response = client.get(f"{reverse('get_stores_by_city')}?city={test_store.city}")
+            assert response.status_code == 200
+            assert response.json()['stores'][0]['id'] == test_store.id
 
-    def test_get_stores_by_city_empty(self, client):
-        """Тест получения магазинов для несуществующего города"""
-        response = client.get(f"{reverse('get_stores_by_city')}?city=Nonexistent")
-        assert response.status_code == 200
-        assert len(response.json()['stores']) == 0
+        def test_get_stores_by_city_empty(self, client):
+            """Тест получения магазинов для несуществующего города"""
+            # Создаем временного пользователя для теста
+            user = User.objects.create_user(
+                username='test_user',
+                password='testpass123',
+                role=User.Role.CUSTOMER
+            )
+            client.force_login(user)
+
+            response = client.get(f"{reverse('get_stores_by_city')}?city=Nonexistent")
+            assert response.status_code == 200
+            assert len(response.json()['stores']) == 0
