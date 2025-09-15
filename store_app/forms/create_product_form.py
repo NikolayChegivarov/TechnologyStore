@@ -3,7 +3,14 @@ from django import forms
 from ..models import Product, Category, Store
 
 
-class CreateProductForm(forms.ModelForm):  # Исправлено название класса
+class CreateProductForm(forms.ModelForm):
+    # Явно определяем поле external_url с параметром assume_scheme
+    external_url = forms.URLField(
+        required=False,
+        assume_scheme='https',  # Добавляем параметр здесь
+        widget=forms.URLInput(attrs={'placeholder': 'https://example.com'})
+    )
+
     class Meta:
         model = Product
         fields = ['category', 'name', 'description', 'price', 'available', 'store', 'image', 'external_url']
@@ -11,11 +18,7 @@ class CreateProductForm(forms.ModelForm):  # Исправлено названи
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
             'price': forms.NumberInput(attrs={'step': '0.01'}),
-            'external_url': forms.URLInput(
-                attrs={
-                    'placeholder': 'https://example.com'
-                }
-            ),
+            # Убираем external_url из widgets, так как определили его выше
         }
 
         labels = {
@@ -33,6 +36,3 @@ class CreateProductForm(forms.ModelForm):  # Исправлено названи
         super().__init__(*args, **kwargs)
         self.fields['category'].empty_label = "Выберите категорию"
         self.fields['store'].empty_label = "Выберите магазин"
-
-        # Явно задаем схему для external_url field
-        self.fields['external_url'].widget.attrs['assume_scheme'] = 'https'
