@@ -1,3 +1,4 @@
+#urls
 """
 URL configuration for store_project project.
 
@@ -22,7 +23,7 @@ from django.views.generic import TemplateView
 
 from store_app.views.auth_views import login_view, CustomerSignUpView, ManagerSignUpView
 from store_app.views.dashboard_views import manager_dashboard, get_stores_by_city, \
-    customer_dashboard, home  # , customer_dashboard
+    customer_profile, home
 from store_app.views.favorite_views import favorites_view, toggle_favorite
 from store_app.views.product_views import product_list, product_detail, create_product, delete_products, \
     deactivate_products, edit_product
@@ -44,7 +45,7 @@ urlpatterns = [
     # Dashboard URLs
     path('manager/dashboard/', manager_dashboard, name='manager_dashboard'),  # Отображает страницу менеджера.
     # Не используется пока.
-    path('customer/dashboard/', customer_dashboard, name='customer_dashboard'), # Отображает страницу покупателя.
+    path('customer/dashboard/', customer_profile, name='customer_dashboard'), # Отображает страницу покупателя.
 
     # Product URLs
     path('manager/create-product/', create_product, name='create_product'), # Создание продукта.
@@ -58,10 +59,6 @@ urlpatterns = [
     # Favorites URLs
     path('favorites/', favorites_view, name='favorites'),  # Для просмотра избранного
     path('favorites/toggle/', toggle_favorite, name='toggle_favorite'),  # Для добавления/удален
-
-    # Profile URLs
-    # path('profile/', customer_profile, name='customer_profile'),
-    # path('orders/history/', order_history, name='order_history'),
 
     # Admin
     path('admin/', admin.site.urls),
