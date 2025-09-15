@@ -45,6 +45,12 @@ class ManagerSignUpForm(UserCreationForm):
         model = User
         fields = ('username', 'email', 'first_name', 'last_name', 'password1', 'password2')
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists():
+            raise forms.ValidationError("Пользователь с таким email уже существует.")
+        return email
+
     def save(self, commit=True):
         user = super().save(commit=False)
         user.role = User.Role.MANAGER
