@@ -1,10 +1,13 @@
 import pytest
+import tempfile
+from PIL import Image
 from factory import fuzzy
 from factory.django import DjangoModelFactory
 from django.test import Client
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import make_password
 from store_app.models import Store, Category, Manager, Customer, Product, User
+
 
 User = get_user_model()
 
@@ -158,3 +161,14 @@ def test_admin_user():
 def client():
     """Фикстура для Django test client"""
     return Client()
+
+
+@pytest.fixture
+def temp_image():
+    """Создает временное изображение для тестов"""
+    image = Image.new('RGB', (100, 100), color='red')
+    tmp_file = tempfile.NamedTemporaryFile(suffix='.jpg', delete=False)
+    image.save(tmp_file, 'JPEG')
+    tmp_file.seek(0)
+    yield tmp_file.name
+    tmp_file.close()
