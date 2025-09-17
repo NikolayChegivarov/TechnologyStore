@@ -204,3 +204,10 @@ JAZZMIN_UI_TWEAKS = {
 
 # Для pytest
 TEST_RUNNER = 'django.test.runner.DiscoverRunner'
+# Настройки для тестов
+if 'test' in sys.argv:
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': ':memory:',
+    }
+    DEBUG = False
