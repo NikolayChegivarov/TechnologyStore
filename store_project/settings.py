@@ -145,9 +145,9 @@ USE_TZ = False               # Отключаем поддержку часов�
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic - директория для собранных статичных файлов (права: www-data)
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'store_app/static'),
+    os.path.join(BASE_DIR, 'store_app/static'),  # Исходные статичные файлы
 ]
 
 MEDIA_URL = '/media/'  # URL-префикс для медиа-файлов
