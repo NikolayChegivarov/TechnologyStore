@@ -4,3 +4,5 @@
 __pycache__/
 DRAFT.md
 /staticfiles/
+store_app/media/
+.coverage
