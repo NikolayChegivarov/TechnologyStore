@@ -145,6 +145,7 @@ USE_TZ = False               # Отключаем поддержку часов�
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Для collectstatic
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'store_app/static'),
 ]
