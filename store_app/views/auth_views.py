@@ -37,7 +37,7 @@ class CustomerSignUpView(CreateView):
 
         # Логиним и перенаправляем
         login(self.request, user)
-        return redirect('home')  # name='home' — как указано в urlpatterns
+        return redirect('home')  #
 
 
 class ManagerSignUpView(CreateView):
