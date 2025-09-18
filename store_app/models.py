@@ -126,6 +126,10 @@ class Customer(models.Model):  # Пользователь сайта
         message='Допустимы только русские буквы, пробелы и дефисы.'
     )
 
+    magic_token = models.CharField(max_length=100, blank=True, null=True, unique=True)
+    token_created_at = models.DateTimeField(null=True, blank=True)
+    is_verified = models.BooleanField(default=False)
+
     # Основной идентификатор - EMAIL. Делаем его уникальным.
     email = models.EmailField(
         max_length=255,  # Увеличил длину, стандартная для EmailField
