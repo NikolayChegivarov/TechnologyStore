@@ -119,25 +119,33 @@ class Manager(models.Model):  # Продавец
         ]
 
 
-class Customer(models.Model):  # Покупатель
-    # Общий валидатор для кириллицы, пробелов и дефисов
+class Customer(models.Model):  # Пользователь сайта
+    # Валидатор для кириллицы, пробелов и дефисов (если имя будет указано)
     cyrillic_validator = RegexValidator(
         regex=r'^[а-яА-ЯёЁ\s-]+$',
         message='Допустимы только русские буквы, пробелы и дефисы.'
     )
-    username = models.CharField(
-        max_length=50,
-        unique=True,
-        verbose_name="Логин",
-        help_text="Уникальный идентификатор пользователя (можно использовать латиницу)"
+
+    # Основной идентификатор - EMAIL. Делаем его уникальным.
+    email = models.EmailField(
+        max_length=255,  # Увеличил длину, стандартная для EmailField
+        unique=True,  # Делаем уникальным! Это будет логин.
+        blank=False,  # Обязательное поле, но только при регистрации
+        null=False,
+        verbose_name="Email"
     )
+
+    # Персональные данные - все НЕОБЯЗАТЕЛЬНЫЕ.
+    # Пользователь может заполнить их позже в личном кабинете.
     last_name = models.CharField(
         max_length=50,
+        blank=True,  # Делаем необязательным
         verbose_name="Фамилия",
         validators=[cyrillic_validator]
     )
     first_name = models.CharField(
         max_length=50,
+        blank=True,  # Делаем необязательным
         verbose_name="Имя",
         validators=[cyrillic_validator]
     )
@@ -147,13 +155,9 @@ class Customer(models.Model):  # Покупатель
         verbose_name="Отчество",
         validators=[cyrillic_validator]
     )
-    email = models.EmailField(
-        max_length=50,
-        null=True,
-        verbose_name="Почта"
-    )
     phone = models.CharField(
         max_length=20,
+        blank=True,  # Делаем необязательным
         verbose_name="Телефон",
         validators=[phone_validator]
     )
@@ -165,22 +169,26 @@ class Customer(models.Model):  # Покупатель
             message='Допустимы русские буквы, цифры, пробелы и знаки .,-'
         )]
     )
+
+    # Служебные поля
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
-    def __str__(self):
-        return f"{self.last_name} {self.first_name} {self.middle_name or ''}".strip()
+    # Добавьте это поле для хранения хэша пароля, если решите использовать пароли
+    # password = models.CharField(max_length=128, blank=True)
 
-    def get_full_name(self):
-        return f"{self.last_name} {self.first_name} {self.middle_name or ''}".strip()
+    def __str__(self):
+        # Если есть имя, выводим его. Если нет - email.
+        if self.first_name or self.last_name:
+            return f"{self.last_name} {self.first_name} {self.middle_name or ''}".strip()
+        return self.email
 
     class Meta:
-        verbose_name = "Покупатель"
-        verbose_name_plural = "Покупатели"
-        ordering = ['last_name', 'first_name']
+        verbose_name = "Пользователь"
+        verbose_name_plural = "Пользователи"
+        ordering = ['email']  # Сортируем по email
         indexes = [
-            models.Index(fields=['last_name', 'first_name']),
-            models.Index(fields=['phone']),
+            models.Index(fields=['email']),  # Индекс на email, т.к. по нему будем искать
         ]
 
 
