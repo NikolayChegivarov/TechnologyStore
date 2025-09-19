@@ -15,6 +15,7 @@
                 </div>
 
                 <div class="card-body">
+
                     {% if messages %}
                     <div class="alert alert-success alert-dismissible fade show mb-4">
                         {% for message in messages %}
@@ -51,7 +52,7 @@
                             <div class="col-md-6">
                                 <div class="form-floating mb-3">
                                     <input type="number" class="form-control" id="product_price"
-                                           name="price" value="{{ form.price.value }}" step="0.01" min="0" required>
+                                           name="price" value="{{ product.price|floatformat:'f' }}" step="0.01" min="0.01" required>
                                     <label for="product_price">Цена *</label>
                                     {% if form.price.errors %}
                                     <div class="invalid-feedback d-block">

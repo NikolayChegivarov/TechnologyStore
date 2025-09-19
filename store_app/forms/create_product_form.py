@@ -7,9 +7,8 @@ class CreateProductForm(forms.ModelForm):
     # Явно определяем поле external_url с параметром assume_scheme
     external_url = forms.URLField(
         required=False,
-        assume_scheme='https',  # Добавляем параметр здесь
         widget=forms.URLInput(attrs={'placeholder': 'https://example.com'}),
-        label='Ссылка на товар'  # ДОБАВЬТЕ ЭТУ СТРОКУ
+        label='Ссылка на товар'
     )
 
     class Meta:
@@ -18,7 +17,7 @@ class CreateProductForm(forms.ModelForm):
 
         widgets = {
             'description': forms.Textarea(attrs={'rows': 3}),
-            'price': forms.NumberInput(attrs={'step': '0.01'}),
+            'price': forms.NumberInput(attrs={'step': '0.01', 'min': '0.01'}),  # Добавлен min
             # Убираем external_url из widgets, так как определили его выше
         }
 
@@ -37,3 +36,9 @@ class CreateProductForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['category'].empty_label = "Выберите категорию"
         self.fields['store'].empty_label = "Выберите магазин"
+
+        # Убедимся, что поле price имеет правильные атрибуты
+        self.fields['price'].widget.attrs.update({
+            'step': '0.01',
+            'min': '0.01'
+        })
