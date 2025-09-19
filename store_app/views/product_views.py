@@ -49,7 +49,7 @@ def create_product(request):
         'success_message': success_message,
         'created_product': created_product
     }
-    return render(request, 'create_product.html', context)
+    return render(request, 'product/create_product.html', context)
 
 
 def delete_products(request):
@@ -106,7 +106,7 @@ def product_detail(request, id, slug):
         product = get_object_or_404(Product, id=id, slug=slug)
     else:
         product = get_object_or_404(Product, id=id, slug=slug, available=True)
-    return render(request, 'view_product.html', {'product': product})
+    return render(request, 'product/view_product.html', {'product': product})
 
 
 def edit_product(request, pk):
@@ -153,7 +153,7 @@ def edit_product(request, pk):
     else:
         form = CreateProductForm(instance=product)
 
-    return render(request, 'edit_product.html', {
+    return render(request, 'product/edit_product.html', {
         'form': form,
         'product': product
     })

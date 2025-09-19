@@ -34,7 +34,7 @@ class TestCreateProductView:
         response = client.get(reverse('create_product'))
         assert response.status_code == 200
         assert 'form' in response.context
-        assert 'create_product.html' in [t.name for t in response.templates]
+        assert 'product/create_product.html' in [t.name for t in response.templates]
 
     def test_create_product_with_image(self, client, test_manager_with_user, test_category, test_store, temp_image):
         """Тест создания товара с изображением"""
