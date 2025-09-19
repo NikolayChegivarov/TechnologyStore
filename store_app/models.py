@@ -282,7 +282,8 @@ class Product(models.Model):  # Продукт
     external_url = models.URLField(
         verbose_name='Ссылка на товар',
         blank=True,
-        null=True
+        null=True,
+        max_length=700
     )
     created_by = models.ForeignKey(
         Manager,
