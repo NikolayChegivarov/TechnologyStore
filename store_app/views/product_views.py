@@ -56,14 +56,27 @@ def delete_products(request):
     """Удаляет продукт(ы)."""
     if request.method == 'POST':
         product_ids = request.POST.getlist('product_ids')
-        Product.objects.filter(id__in=product_ids).delete()
-        # Перенаправляем обратно на dashboard с сохранением фильтров
+
+        # Логирование перед удалением
+        products = Product.objects.filter(id__in=product_ids)
+        for product in products:
+            ActionLog.objects.create(
+                user=request.user,
+                action_type='DELETE',
+                product_name=product.name,
+                product_id=product.id,
+                details=f"Товар удален: {product.name}"
+            )
+
+        products.delete()
+        messages.success(request, f'Удалено товаров: {len(product_ids)}')
         return redirect('manager_dashboard')
     return redirect('manager_dashboard')
 
 
 def deactivate_products(request):
-    """Убирает продукт(ы) из наличия."""
+    """Убирает продукт(ы) из наличия.
+    Продукт становится не доступен для пользователя сайтом."""
     if request.method == 'POST':
         product_ids = request.POST.getlist('product_ids')
         Product.objects.filter(id__in=product_ids).update(available=False)
@@ -71,42 +84,42 @@ def deactivate_products(request):
     return redirect('manager_dashboard')
 
 
-def product_list(request, category_slug=None):
-    """Отображает список товаров с возможностью фильтрации по категории:
-    - Получает все доступные товары (available=True)
-    - Если передан category_slug, фильтрует товары по категории
-    - Возвращает список всех категорий для навигации
-    - Использует шаблон product/list.html
-
-    Args:
-        category_slug (str, optional): Слаг категории для фильтрации товаров
-    """
-    category = None
-    categories = Category.objects.all()
-    products = Product.objects.filter(available=True)
-
-    if category_slug:
-        category = get_object_or_404(Category, slug=category_slug)
-        products = products.filter(category=category)
-
-    return render(request, 'product/list.html', {
-        'category': category,
-        'categories': categories,
-        'products': products
-    })
+# def product_list(request, category_slug=None):
+#     """Отображает список товаров с возможностью фильтрации по категории:
+#     - Получает все доступные товары (available=True)
+#     - Если передан category_slug, фильтрует товары по категории
+#     - Возвращает список всех категорий для навигации
+#     - Использует шаблон product/list.html
+#
+#     Args:
+#         category_slug (str, optional): Слаг категории для фильтрации товаров
+#     """
+#     category = None
+#     categories = Category.objects.all()
+#     products = Product.objects.filter(available=True)
+#
+#     if category_slug:
+#         category = get_object_or_404(Category, slug=category_slug)
+#         products = products.filter(category=category)
+#
+#     return render(request, 'product/list.html', {
+#         'category': category,
+#         'categories': categories,
+#         'products': products
+#     })
 
 
 def product_detail(request, id, slug):
     """Отображает детальную страницу товара:
     - Находит товар по id и slug (двойная проверка URL)
-    - Для менеджеров показывает все товары (даже unavailable)
-    - Для клиентов показывает только available товары
+    - Для менеджеров показывает любой товар (даже со статусом нет в наличии)
+    - Для клиентов показывает только товары со статусом доступен для продажи.
     """
     if request.user.is_authenticated and request.user.role == 'MANAGER':
         product = get_object_or_404(Product, id=id, slug=slug)
     else:
         product = get_object_or_404(Product, id=id, slug=slug, available=True)
-    return render(request, 'product/view_product.html', {'product': product})
+    return render(request, 'product/detail_product.html', {'product': product})
 
 
 def edit_product(request, pk):
