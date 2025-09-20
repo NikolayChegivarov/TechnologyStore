@@ -118,26 +118,26 @@ def get_stores_by_city(request):
     return JsonResponse({'stores': list(stores)})
 
 
-def customer_profile(request):
-    """
-    Представление для отображения личного кабинета покупателя
-    """
-    # Проверяем, что пользователь действительно покупатель
-    if request.user.role != 'CUSTOMER':
-        messages.error(request, 'Доступ только для покупателей')
-        return redirect('home')
-
-    # Получаем количество избранных товаров
-    favorite_count = 0
-    if hasattr(request.user, 'customer_profile'):
-        favorite_count = FavoriteProduct.objects.filter(
-            user=request.user.customer_profile
-        ).count()
-
-    context = {
-        'user': request.user,
-        'favorite_count': favorite_count,
-    }
-
-    # Убедитесь, что используете правильный путь к шаблону
-    return render(request, 'dashboard/customer.html', context)
+# def customer_profile(request):
+#     """
+#     Представление для отображения личного кабинета покупателя
+#     """
+#     # Проверяем, что пользователь действительно покупатель
+#     if request.user.role != 'CUSTOMER':
+#         messages.error(request, 'Доступ только для покупателей')
+#         return redirect('home')
+#
+#     # Получаем количество избранных товаров
+#     favorite_count = 0
+#     if hasattr(request.user, 'customer_profile'):
+#         favorite_count = FavoriteProduct.objects.filter(
+#             user=request.user.customer_profile
+#         ).count()
+#
+#     context = {
+#         'user': request.user,
+#         'favorite_count': favorite_count,
+#     }
+#
+#     # Убедитесь, что используете правильный путь к шаблону
+#     return render(request, 'dashboard/customer.html', context)

@@ -75,7 +75,7 @@ def delete_products(request):
 
 
 def deactivate_products(request):
-    """Убирает продукт(ы) из наличия.
+    """Меняет статус продукта, убирая ищ наличия.
     Продукт становится не доступен для пользователя сайтом."""
     if request.method == 'POST':
         product_ids = request.POST.getlist('product_ids')
@@ -123,6 +123,7 @@ def product_detail(request, id, slug):
 
 
 def edit_product(request, pk):
+    """Изменяет продукт."""
     if request.user.role != 'MANAGER':
         return redirect('login')
 
