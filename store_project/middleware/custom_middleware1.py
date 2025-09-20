@@ -41,6 +41,9 @@ class RoleMiddleware:
                 reverse('manager_signup'),
                 reverse('privacy_policy'),
             ]
+            # Разрешаем доступ к URL деталей товара
+            if request.path.startswith('/product/'):
+                return None
             if request.path not in allowed_urls:
                 return redirect('login')
             return None
