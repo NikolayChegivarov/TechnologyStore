@@ -139,5 +139,10 @@ def customer_profile(request):
         'favorite_count': favorite_count,
     }
 
-    # Убедитесь, что используете правильный путь к шаблону
     return render(request, 'dashboard/customer.html', context)
+
+def ContactsView(request):
+    """Контакты"""
+    return render(request, 'basement/сontacts.html')
+
+

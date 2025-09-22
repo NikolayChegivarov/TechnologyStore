@@ -23,7 +23,7 @@ from django.views.generic import TemplateView
 
 from store_app.views.auth_views import login_view, CustomerSignUpView, ManagerSignUpView
 from store_app.views.dashboard_views import manager_dashboard, get_stores_by_city, \
-    customer_profile, home
+    customer_profile, home, ContactsView
 from store_app.views.favorite_views import favorites_view, toggle_favorite
 from store_app.views.product_views import create_product, delete_products, \
     deactivate_products, edit_product, product_detail # product_list,
@@ -39,8 +39,9 @@ urlpatterns = [
     path('signup/customer/', CustomerSignUpView.as_view(), name='customer_signup'), # Регистрация покупателя.
     path('signup/manager/', ManagerSignUpView.as_view(), name='manager_signup'),  # Регистрация менеджера(панель админа).
 
-    # Политика конфиденциальности
-    path('privacy/', TemplateView.as_view(template_name='privacy.html'), name='privacy_policy'),
+    # Подвал
+    path('home/contacts/', ContactsView, name='contacts_view'), # Контакты
+    path('privacy/', TemplateView.as_view(template_name='templates/basement/privacy.html'), name='privacy_policy'),  # (Не используется)
 
     # Dashboard URLs
     path('manager/dashboard/', manager_dashboard, name='manager_dashboard'),  # Отображает страницу менеджера.
@@ -52,9 +53,8 @@ urlpatterns = [
     path('product/<int:id>/<slug:slug>/', product_detail, name='product_detail'),  # Просмотр продукта.
     path('product/edit/<int:pk>/', edit_product, name='edit_product'),  # Редактирование продукта.
     path('manager/delete-products/', delete_products, name='delete_products'), # Удаление продукта.
-    path('manager/deactivate-products/', deactivate_products, name='deactivate_products'),
-    # path('products/', product_list, name='product_list'), # Список продуктов
-    # path('products/<slug:category_slug>/', product_list, name='product_list_by_category'), # Список прод по категории.
+    path('manager/deactivate-products/', deactivate_products, name='deactivate_products'), # Снять с продажи.
+
 
     # Favorites URLs
     path('favorites/', favorites_view, name='favorites'),  # Для просмотра избранного

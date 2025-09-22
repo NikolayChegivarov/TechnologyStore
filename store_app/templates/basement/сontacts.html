@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Контакты - Gadgetia{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <h1 class="mb-4">Контакты</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h3 class="card-title">Контактная информация</h3>
+                    <p class="card-text">
+                        <i class="fas fa-envelope me-2"></i>
+                        <strong>Email:</strong> 
+                        <a href="mailto:oootex22@gmail.com">oootex22@gmail.com</a>
+                    </p>
+                </div>
+            </div>
+
+            <h2 class="mb-3">Наши филиалы</h2>
+            
+            <!-- Две колонки с филиалами -->
+            <div class="row">
+                <!-- Колонка Костромы -->
+                <div class="col-md-6">
+                    <h4 class="text-center mb-3">Кострома</h4>
+
+                    <!-- Филиал 1 - Кострома -->
+                    <div class="accordion mb-3" id="kostromaAccordion">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingKostroma1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseKostroma1" aria-expanded="false" aria-controls="collapseKostroma1">
+                                    <strong>Кинешемское шоссе 35</strong>
+                                    <span class="badge bg-primary ms-2">Ремонт Скупка Реализация</span>
+                                </button>
+                            </h2>
+                            <div id="collapseKostroma1" class="accordion-collapse collapse"
+                                 aria-labelledby="headingKostroma1" data-bs-parent="#kostromaAccordion">
+                                <div class="accordion-body">
+                                    <p><strong>Адрес:</strong> г. Кострома, Кинешемское шоссе, 35</p>
+                                    <p><strong>Телефон:</strong> <a href="tel:+79203818241">+7 (920) 381-82-41</a></p>
+                                    <p><strong>Услуги:</strong> Ремонт, Скупка, Реализация</p>
+                                    <h6>Режим работы:</h6>
+                                    <ul class="list-unstyled">
+                                        <li>Пн 9:00 - 19:00</li>
+                                        <li>Вт 9:00 - 19:00</li>
+                                        <li>Ср 9:00 - 19:00</li>
+                                        <li>Чт 9:00 - 19:00</li>
+                                        <li>Пт 9:00 - 19:00</li>
+                                        <li>Сб 9:00 - 17:00</li>
+                                        <li>Вс 9:00 - 17:00</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Филиал 2 - Кострома -->
+                    <div class="accordion mb-3" id="kostromaAccordion2">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingKostroma2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseKostroma2" aria-expanded="false" aria-controls="collapseKostroma2">
+                                    <strong>Московская улица, 98</strong>
+                                    <span class="badge bg-success ms-2">Скупка Реализация</span>
+                                </button>
+                            </h2>
+                            <div id="collapseKostroma2" class="accordion-collapse collapse"
+                                 aria-labelledby="headingKostroma2" data-bs-parent="#kostromaAccordion2">
+                                <div class="accordion-body">
+                                    <p><strong>Адрес:</strong> г. Кострома, Московская улица, 98</p>
+                                    <p><strong>Телефон:</strong> <a href="tel:+79203815480">+7 (920) 381-54-80</a></p>
+                                    <p><strong>Услуги:</strong> Скупка, Реализация</p>
+                                    <h6>Режим работы:</h6>
+                                    <ul class="list-unstyled">
+                                        <li>Пн 10:00 - 19:00</li>
+                                        <li>Вт 10:00 - 19:00</li>
+                                        <li>Ср 10:00 - 19:00</li>
+                                        <li>Чт 10:00 - 19:00</li>
+                                        <li>Пт 10:00 - 19:00</li>
+                                        <li>Сб 10:00 - 19:00</li>
+                                        <li>Вс 10:00 - 19:00</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Колонка Нижнего Новгорода -->
+                <div class="col-md-6">
+                    <h4 class="text-center mb-3">Нижний Новгород</h4>
+
+                    <!-- Филиал 3 - Нижний Новгород -->
+                    <div class="accordion mb-3" id="nnAccordion1">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingNN1">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseNN1" aria-expanded="false" aria-controls="collapseNN1">
+                                    <strong>Маршала Рокоссовского 17</strong>
+                                    <span class="badge bg-success ms-2">Скупка Реализация</span>
+                                </button>
+                            </h2>
+                            <div id="collapseNN1" class="accordion-collapse collapse"
+                                 aria-labelledby="headingNN1" data-bs-parent="#nnAccordion1">
+                                <div class="accordion-body">
+                                    <p><strong>Адрес:</strong> г. Нижний Новгород, ул. Маршала Рокоссовского, 17</p>
+                                    <p><strong>Телефон:</strong> <a href="tel:+79200051995">+7 (920) 005-19-95</a></p>
+                                    <p><strong>Услуги:</strong> Скупка, Реализация</p>
+                                    <h6>Режим работы:</h6>
+                                    <ul class="list-unstyled">
+                                        <li>Пн 10:00 - 19:00</li>
+                                        <li>Вт 10:00 - 19:00</li>
+                                        <li>Ср 10:00 - 19:00</li>
+                                        <li>Чт 10:00 - 19:00</li>
+                                        <li>Пт 10:00 - 19:00</li>
+                                        <li>Сб 10:00 - 19:00</li>
+                                        <li>Вс 10:00 - 19:00</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Филиал 4 - Нижний Новгород -->
+                    <div class="accordion mb-3" id="nnAccordion2">
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="headingNN2">
+                                <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                        data-bs-target="#collapseNN2" aria-expanded="false" aria-controls="collapseNN2">
+                                    <strong>Проспект Молодежный 19</strong>
+                                    <span class="badge bg-success ms-2">Скупка Реализация</span>
+                                </button>
+                            </h2>
+                            <div id="collapseNN2" class="accordion-collapse collapse"
+                                 aria-labelledby="headingNN2" data-bs-parent="#nnAccordion2">
+                                <div class="accordion-body">
+                                    <p><strong>Адрес:</strong> г. Нижний Новгород, Проспект Молодежный, 19</p>
+                                    <p><strong>Телефон:</strong> <a href="tel:+79302849406">+7 (930) 284-94-06</a></p>
+                                    <p><strong>Услуги:</strong> Скупка, Реализация</p>
+                                    <h6>Режим работы:</h6>
+                                    <ul class="list-unstyled">
+                                        <li>Пн 10:00 - 19:00</li>
+                                        <li>Вт 10:00 - 19:00</li>
+                                        <li>Ср 10:00 - 19:00</li>
+                                        <li>Чт 10:00 - 19:00</li>
+                                        <li>Пт 10:00 - 19:00</li>
+                                        <li>Сб 10:00 - 19:00</li>
+                                        <li>Вс 10:00 - 19:00</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

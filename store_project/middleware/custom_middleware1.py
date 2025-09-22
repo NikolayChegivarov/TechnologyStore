@@ -33,20 +33,25 @@ class RoleMiddleware:
             return None
 
         if not request.user.is_authenticated:
-            allowed_urls = [
-                reverse('home'),
-                reverse('login'),
-                reverse('signup'),
-                reverse('customer_signup'),
-                reverse('manager_signup'),
-                reverse('privacy_policy'),
+            # Разрешаем доступ к публичным страницам
+            public_paths = [
+                '/',  # home
+                '/login/',
+                '/signup/',
+                '/customer/signup/',
+                '/manager/signup/',
+                '/privacy/',
+                'home/contacts/',
             ]
-            # Разрешаем доступ к URL деталей товара
-            if request.path.startswith('/product/'):
+
+            # Разрешаем доступ к URL деталей товара и контактов (по началу пути)
+            if (request.path.startswith('/product/') or
+                    request.path.startswith('home/contacts/') or
+                    any(request.path == path or request.path.startswith(path) for path in public_paths)):
                 return None
-            if request.path not in allowed_urls:
-                return redirect('login')
-            return None
+
+            # Для всех остальных страниц - редирект на логин
+            return redirect('login')
 
         # Для суперпользователя разрешаем доступ ко всему
         if request.user.is_superuser:
