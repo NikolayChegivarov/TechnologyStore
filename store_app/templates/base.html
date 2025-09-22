@@ -44,8 +44,9 @@
 
         .footer {
             background-color: #f8f9fa;
-            padding: 20px 0;
+            padding: 30px 0 20px;
             margin-top: 40px;
+            border-top: 1px solid #dee2e6;
         }
 
         .user-avatar {
@@ -67,6 +68,45 @@
 
         .nav-link {
             position: relative;
+        }
+
+        .footer-section {
+            margin-bottom: 15px;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .footer-links li {
+            margin-bottom: 8px;
+        }
+
+        .footer-links a {
+            text-decoration: none;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+
+        .footer-links a:hover {
+            color: #007bff;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+        }
+
+        .social-links a {
+            font-size: 20px;
+            color: #6c757d;
+            transition: color 0.3s;
+        }
+
+        .social-links a:hover {
+            color: #007bff;
         }
     </style>
 
@@ -176,39 +216,54 @@
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-4">
-                    <h5>О магазине</h5>
-                    <p>Gadgetia - Мы покупаем и реализуем</p>
-                    <p>электронику и инструменты</p>
+                <!-- Информация и контакты -->
+                <div class="col-md-6">
+                    <div class="footer-section">
+                        <h5>О магазине</h5>
+                        <p class="mb-2">Gadgetia - покупаем и реализуем электронику и инструменты</p>
+                    </div>
+
+                    <div class="footer-section">
+                        <h5>Контакты</h5>
+                        <ul class="footer-links">
+                            <li>
+                                <a href="{% url 'contacts_view' %}">
+                                    <i class="fas fa-map-marker-alt me-2"></i>Наши филиалы
+                                </a>
+                            </li>
+                            <li>
+                                <a href="mailto:oootex22@gmail.com">
+                                    <i class="fas fa-envelope me-2"></i>oootex22@gmail.com
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="col-md-4">
-                    <h5>Контакты</h5>
-                    <ul class="list-unstyled">
-                        <li>
-                            <a href="{% url 'contacts_view' %}" class="text-decoration-none text-dark">
-                                <i class="fas fa-envelope"></i> Контакты
-                            </a>
-                        </li>
-                    </ul>
-                </div>
-                <div class="col-md-4">
-                    <h5>Мы в соцсетях</h5>
-                    <div class="d-flex flex-column">
-                        <a href="https://vk.com/tehnikakn" class="text-dark me-2 mb-2" style="font-size: 18px;">
-                            <i class="fab fa-vk"></i> ВКонтакте
-                        </a>
-                        <a href="https://www.avito.ru/brands/f97f766490fdf51a7ac0979f5862da7c/all?gdlkerfdnwq=101&page_from=from_item_card&iid=7642892784&sellerId=fe89df6deab6245effd23be5b9f26b0f"
-                           class="text-dark me-2" style="font-size: 18px;" target="_blank">
-                            <i class="fas fa-store"></i> Avito магазин
-                        </a>
+
+                <!-- Соцсети -->
+                <div class="col-md-6">
+                    <div class="footer-section">
+                        <h5>Мы в соцсетях</h5>
+                        <ul class="footer-links">
+                            <li>
+                                <a href="https://vk.com/tehnikakn" target="_blank">
+                                    <i class="fab fa-vk me-2"></i>ВКонтакте
+                                </a>
+                            </li>
+                            <li>
+                                <a href="https://www.avito.ru/brands/f97f766490fdf51a7ac0979f5862da7c/all?gdlkerfdnwq=101&page_from=from_item_card&iid=7642892784&sellerId=fe89df6deab6245effd23be5b9f26b0f"
+                                   target="_blank">
+                                    <i class="fas fa-store me-2"></i>Avito магазин
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="footer-section">
+                        <small class="text-muted">© 2023 Gadgetia. Все права защищены.</small>
                     </div>
                 </div>
             </div>
-<!--            <hr>-->
-<!--            <div class="text-center">-->
-<!--                <small class="text-muted">© 2023 Gadgetia. Все права защищены.</small>-->
-<!--                <a href="{% url 'privacy_policy' %}">Политика конфиденциальности</a>-->
-<!--            </div>-->
         </div>
     </footer>
 
