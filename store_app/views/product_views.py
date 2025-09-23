@@ -70,7 +70,9 @@ def delete_products(request):
             messages.error(request, 'Выбранные товары не найдены')
             return redirect('manager_dashboard')
 
-        # Удаляем файлы изображений
+        deleted_count = 0
+
+        # Удаляем каждый продукт по отдельности
         for product in products:
             # Логирование
             ActionLog.objects.create(
@@ -81,17 +83,10 @@ def delete_products(request):
                 details=f"Товар удален: {product.name}"
             )
 
-            # Удаляем файл изображения
-            if product.image:
-                if os.path.isfile(product.image.path):
-                    try:
-                        os.remove(product.image.path)
-                    except Exception as e:
-                        print(f"Ошибка при удалении файла: {e}")
+            # Удаляем продукт (это вызовет метод delete() модели)
+            product.delete()
+            deleted_count += 1
 
-        # Удаляем записи из базы
-        deleted_count = products.count()
-        products.delete()
         messages.success(request, f'Удалено товаров: {deleted_count}')
         return redirect('manager_dashboard')
     return redirect('manager_dashboard')
