@@ -55,7 +55,6 @@ urlpatterns = [
     path('manager/delete-products/', delete_products, name='delete_products'), # Удаление продукта.
     path('manager/deactivate-products/', deactivate_products, name='deactivate_products'), # Снять с продажи.
 
-
     # Favorites URLs
     path('favorites/', favorites_view, name='favorites'),  # Для просмотра избранного
     path('favorites/toggle/', toggle_favorite, name='toggle_favorite'),  # Для добавления/удален

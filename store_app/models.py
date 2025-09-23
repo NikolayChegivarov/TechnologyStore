@@ -5,6 +5,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
 from enum import Enum
+import os
+from django.conf import settings
 
 
 phone_validator = RegexValidator(
@@ -311,6 +313,14 @@ class Product(models.Model):  # Продукт
                 num += 1
             self.slug = unique_slug
         super().save(*args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        # Удаляем файл изображения если он существует
+        if self.image:
+            if os.path.isfile(self.image.path):
+                os.remove(self.image.path)
+        # Удаляем запись из базы данных
+        super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.name
