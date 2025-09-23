@@ -120,13 +120,7 @@
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div class="flex-grow-1">
                                             <h5 class="card-title">
-                                                {% if product.external_url %}
-                                                    <a href="{{ product.external_url }}" target="_blank" class="text-decoration-none text-dark" id="product-link-{{ product.id }}">
-                                                        {{ product.name }} <i class="fas fa-external-link-alt fa-xs text-primary"></i>
-                                                    </a>
-                                                {% else %}
-                                                    {{ product.name }}
-                                                {% endif %}
+                                                {{ product.name }}
                                             </h5>
                                         </div>
                                         <div class="d-flex flex-column align-items-end">
@@ -139,10 +133,15 @@
                                                 </button>
                                             {% endif %}
                                             <a href="{% url 'product_detail' id=product.id slug=product.slug %}"
-                                               class="btn btn-sm btn-outline-primary"
+                                               class="btn btn-sm btn-outline-primary mb-2"
                                                title="Подробная информация о товаре">
                                                 <i class="fas fa-info-circle"></i> Детали
                                             </a>
+                                            {% if product.external_url %}
+                                                <a href="{{ product.external_url }}" target="_blank" class="btn btn-sm btn-success" id="product-link-{{ product.id }}">
+                                                    <i class="fas fa-external-link-alt me-1"></i>В магазин
+                                                </a>
+                                            {% endif %}
                                         </div>
                                     </div>
 
