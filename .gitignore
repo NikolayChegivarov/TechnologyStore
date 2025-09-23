@@ -3,6 +3,5 @@
 /.idea/
 __pycache__/
 DRAFT.md
-/staticfiles/
 .coverage
 store_app/media/products/*
