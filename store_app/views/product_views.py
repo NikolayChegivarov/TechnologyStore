@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from ..forms.create_product_form import CreateProductForm
 from ..models import Product, Category, ActionLog
 from django.contrib import messages
+import os
 
 
 def create_product(request):
@@ -53,13 +54,25 @@ def create_product(request):
 
 
 def delete_products(request):
-    """Удаляет продукт(ы)."""
+    """Удаляет продукт(ы) вместе с изображениями."""
     if request.method == 'POST':
         product_ids = request.POST.getlist('product_ids')
 
-        # Логирование перед удалением
+        # Проверка на пустой список
+        if not product_ids:
+            messages.warning(request, 'Не выбрано товаров для удаления')
+            return redirect('manager_dashboard')
+
         products = Product.objects.filter(id__in=product_ids)
+
+        # Проверка на существование продуктов
+        if not products.exists():
+            messages.error(request, 'Выбранные товары не найдены')
+            return redirect('manager_dashboard')
+
+        # Удаляем файлы изображений
         for product in products:
+            # Логирование
             ActionLog.objects.create(
                 user=request.user,
                 action_type='DELETE',
@@ -68,8 +81,18 @@ def delete_products(request):
                 details=f"Товар удален: {product.name}"
             )
 
+            # Удаляем файл изображения
+            if product.image:
+                if os.path.isfile(product.image.path):
+                    try:
+                        os.remove(product.image.path)
+                    except Exception as e:
+                        print(f"Ошибка при удалении файла: {e}")
+
+        # Удаляем записи из базы
+        deleted_count = products.count()
         products.delete()
-        messages.success(request, f'Удалено товаров: {len(product_ids)}')
+        messages.success(request, f'Удалено товаров: {deleted_count}')
         return redirect('manager_dashboard')
     return redirect('manager_dashboard')
 
