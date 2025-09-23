@@ -316,8 +316,8 @@ class Product(models.Model):  # Продукт
 
     def delete(self, *args, **kwargs):
         # Удаляем файл изображения если он существует
-        if self.image:
-            if os.path.isfile(self.image.path):
+        if self.image:  # Проверка, что поле image не пустое
+            if os.path.isfile(self.image.path):  # Проверка, что файл существует
                 os.remove(self.image.path)
         # Удаляем запись из базы данных
         super().delete(*args, **kwargs)
