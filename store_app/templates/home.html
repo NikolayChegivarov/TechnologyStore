@@ -58,37 +58,17 @@
     color: white !important; /* Белый текст при наведении */
 }
 
-/* Стиль для контейнера изображения товара */
-.card-img-container {
-    height: 100%; /* Занимает всю высоту родителя */
-    display: flex; /* Flexbox для выравнивания */
-    align-items: flex-start; /* Выравнивание по верху */
-}
-
-/* Стиль для контейнера информации о товаре */
-.card-body {
-    display: flex; /* Flexbox для выравнивания */
-    flex-direction: column; /* Вертикальное направление */
-    justify-content: flex-start; /* Прижатие контента к верху */
-    height: 100%; /* Занимает всю высоту родителя */
-}
-
-/* Стиль для контента внутри карточки */
-.card-body .mt-auto {
-    margin-top: auto !important; /* Автоматический отступ сверху - прижимает к низу */
-}
-
 /* Кнопка "Перейти в магазин" с бледно-сиреневым акцентом */
 .btn-success {
-    background-color: #9575cd !important; /* Яркий и насыщенный сиреневый при наведении цвет фона */
-    border-color: #9575cd !important; /* Яркий и насыщенный сиреневый при наведении цвет фона цвет рамки */
+    background-color: #9575cd !important; /* B19CD9 Бледно-сиреневый цвет фона */
+    border-color: #b39ddb !important; /* Бледно-сиреневый цвет рамки */
     color: white !important; /* Белый цвет текста */
 }
 
 /* Состояние кнопки "В магазин" при наведении */
 .btn-success:hover {
-    background-color: #8B5CF6 !important; /* Глубокий фиолетовый*/
-    border-color: #8B5CF6 !important; /* Глубокий фиолетовый */
+    background-color: #8B5CF6 !important; /* Более яркий и насыщенный сиреневый при наведении */
+    border-color: #B19CD9 !important; /* Более яркий и насыщенный сиреневый рамки при наведении */
 }
 
 /* Стиль для статуса "Доступен" */
@@ -112,13 +92,55 @@
 
 /* Карточка товара с акцентным оформлением */
 .product-card {
-<!--    border-left: 4px solid #55759c !important; /* Синяя левая граница */-->
-<!--    transition: box-shadow 0.3s ease; /* Плавная анимация тени */-->
+    /* border-left: 4px solid #55759c !important; /* Синяя левая граница */
+    /* transition: box-shadow 0.3s ease; /* Плавная анимация тени */
 }
 
 /* Эффект при наведении на карточку товара */
 .product-card:hover {
     box-shadow: 0 4px 12px rgba(85, 117, 156, 0.15) !important; /* Тень при наведении */
+}
+
+/* Контейнер для информации о товаре с прижатием к верху */
+.card-body {
+    display: flex; /* Flexbox для гибкого расположения */
+    flex-direction: column; /* Вертикальное направление */
+    justify-content: flex-start; /* Прижимаем контент к верху */
+    height: 100%; /* Высота на весь родительский контейнер */
+    padding-top: 1rem; /* Фиксированный отступ сверху */
+}
+
+/* Верхняя часть карточки с заголовком и кнопками */
+.card-body .d-flex.justify-content-between {
+    flex-shrink: 0; /* Запрещаем сжатие этого блока */
+    margin-bottom: 1rem; /* Фиксированный отступ снизу */
+}
+
+/* Нижняя часть карточки с деталями товара */
+.card-body .mt-auto {
+    margin-top: auto !important; /* Прижимаем к низу карточки */
+    flex-shrink: 0; /* Запрещаем сжатие этого блока */
+}
+
+/* Заголовок товара с фиксированным отступом */
+.card-title {
+    margin-bottom: 0.5rem !important; /* Фиксированный отступ снизу */
+}
+
+/* Блок с кнопками действий */
+.d-flex.flex-column.align-items-end {
+    flex-shrink: 0; /* Запрещаем сжатие этого блока */
+}
+
+/* Контейнер строки карточки товара */
+.row.g-0 {
+    align-items: flex-start; /* Прижимаем содержимое к верху */
+}
+
+/* Колонка с информацией о товаре */
+.col-md-8 {
+    display: flex; /* Flexbox для выравнивания */
+    flex-direction: column; /* Вертикальное направление */
 }
 </style>
 
