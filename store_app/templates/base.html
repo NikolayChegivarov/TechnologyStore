@@ -30,44 +30,42 @@
 
         main {
             flex: 1 0 auto;
-            padding-bottom: 20px;
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.95); /* Увеличил прозрачность для лучшей читаемости */
             border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            margin-bottom: 20px;
+            padding: 15px; /* Уменьшил отступы для мобильных */
+            margin: 15px 10px; /* Уменьшил отступы по краям */
         }
 
         .navbar-brand {
             font-weight: bold;
+            font-size: 1.1rem; /* Увеличил для мобильных */
         }
 
         .footer {
             background-color: #f8f9fa;
-            padding: 30px 0 20px;
-            margin-top: 40px;
+            padding: 20px 0 15px; /* Уменьшил отступы */
+            margin-top: 30px;
             border-top: 1px solid #dee2e6;
+            font-size: 0.9rem; /* Уменьшил размер шрифта */
         }
 
         .user-avatar {
-            width: 40px;
-            height: 40px;
+            width: 35px; /* Уменьшил для мобильных */
+            height: 35px;
             border-radius: 50%;
         }
 
         .favorite-counter {
             position: relative;
+            margin-right: 10px;
         }
 
         .favorite-counter .badge {
             position: absolute;
             top: -5px;
             right: -5px;
-            font-size: 12px;
-        }
-
-        .nav-link {
-            position: relative;
+            font-size: 10px; /* Уменьшил размер */
+            padding: 3px 6px;
         }
 
         .footer-section {
@@ -80,13 +78,14 @@
         }
 
         .footer-links li {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .footer-links a {
             text-decoration: none;
             color: #6c757d;
             transition: color 0.3s;
+            font-size: 0.9rem;
         }
 
         .footer-links a:hover {
@@ -95,12 +94,12 @@
 
         .social-links {
             display: flex;
-            gap: 15px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 8px;
         }
 
         .social-links a {
-            font-size: 20px;
+            font-size: 18px;
             color: #6c757d;
             transition: color 0.3s;
         }
@@ -108,18 +107,144 @@
         .social-links a:hover {
             color: #007bff;
         }
+
+        /* Мобильные стили */
+        @media (max-width: 768px) {
+            main {
+                padding: 12px;
+                margin: 10px 5px;
+                border-radius: 8px;
+            }
+
+            .navbar-brand {
+                font-size: 1rem;
+            }
+
+            .nav-link {
+                padding: 8px 12px;
+                font-size: 0.95rem;
+            }
+
+            .dropdown-menu {
+                border: none;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            }
+
+            .footer {
+                padding: 15px 0 10px;
+                font-size: 0.85rem;
+            }
+
+            .footer-section h5 {
+                font-size: 1rem;
+            }
+
+            .footer-links a {
+                font-size: 0.85rem;
+            }
+
+            .social-links {
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .alert {
+                font-size: 0.9rem;
+                padding: 10px 15px;
+            }
+
+            .btn-close {
+                padding: 12px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            main {
+                padding: 10px;
+                margin: 8px 5px;
+            }
+
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+
+            .navbar-nav .dropdown-menu {
+                position: static;
+                float: none;
+                width: 100%;
+                margin-top: 5px;
+            }
+
+            .footer .row {
+                text-align: center;
+            }
+
+            .footer-section {
+                margin-bottom: 20px;
+            }
+
+            .footer-links li {
+                margin-bottom: 8px;
+            }
+
+            /* Улучшение для кнопок в выпадающем меню */
+            .dropdown-item {
+                padding: 10px 15px;
+                font-size: 0.95rem;
+            }
+
+            /* Улучшение для кнопки выхода */
+            .dropdown-item button {
+                width: 100%;
+                text-align: left;
+                padding: 10px 15px;
+            }
+        }
+
+        /* Улучшение касания для мобильных */
+        @media (max-width: 768px) {
+            .nav-link, .dropdown-item, .btn {
+                min-height: 44px; /* Минимальная высота для удобного касания */
+                display: flex;
+                align-items: center;
+            }
+
+            .navbar-toggler {
+                padding: 6px 10px;
+                min-height: 44px;
+            }
+        }
+
+        /* Улучшение для очень маленьких экранов */
+        @media (max-width: 360px) {
+            .navbar-brand {
+                font-size: 0.9rem;
+            }
+
+            .nav-link {
+                font-size: 0.9rem;
+                padding: 6px 10px;
+            }
+
+            main {
+                margin: 5px 3px;
+                padding: 8px;
+            }
+        }
     </style>
 
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-4">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3"> <!-- Уменьшил margin-bottom -->
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
                 <i class="fas fa-mobile-alt"></i> Gadgetia
             </a>
 
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                    aria-controls="navbarContent" aria-expanded="false" aria-label="Переключить навигацию">
                 <span class="navbar-toggler-icon"></span>
             </button>
 
@@ -139,39 +264,45 @@
                     {% endif %}
                 </ul>
 
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
                     {% if user.is_authenticated %}
                         <li class="nav-item favorite-counter">
-                            <a class="nav-link" href="{% url 'favorites' %}" title="Избранное">
+                            <a class="nav-link position-relative" href="{% url 'favorites' %}" title="Избранное">
                                 <i class="fas fa-star"></i>
-                                <span class="badge bg-warning text-dark" id="global-favorite-counter">
+                                <span class="badge bg-warning text-dark" id="global-favorite-counter"
+                                      style="display: {% if favorite_count > 0 %}inline-block{% else %}none{% endif %};">
                                     {% if favorite_count > 0 %}{{ favorite_count }}{% endif %}
                                 </span>
                             </a>
                         </li>
 
                         <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
+                               role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                 {% if user.role == 'CUSTOMER' %}
-                                    <i class="fas fa-user"></i> {{ user.get_full_name|default:user.username }}
+                                    <i class="fas fa-user me-1"></i>
+                                    <span class="d-none d-sm-inline">{{ user.get_full_name|default:user.username }}</span>
                                 {% elif user.role == 'MANAGER' %}
-                                    <i class="fas fa-user-tie"></i> {{ user.get_full_name|default:user.username }}
+                                    <i class="fas fa-user-tie me-1"></i>
+                                    <span class="d-none d-sm-inline">{{ user.get_full_name|default:user.username }}</span>
                                 {% else %}
-                                    <i class="fas fa-user-shield"></i> {{ user.username }}
+                                    <i class="fas fa-user-shield me-1"></i>
+                                    <span class="d-none d-sm-inline">{{ user.username }}</span>
                                 {% endif %}
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 {% if user.role == 'CUSTOMER' %}
-                                    <li><a class="dropdown-item" href="{% url 'customer_dashboard' %}">
-                                        <i class="fas fa-user-circle"></i> Профиль
+                                    <li><a class="dropdown-item d-flex align-items-center" href="{% url 'customer_dashboard' %}">
+                                        <i class="fas fa-user-circle me-2"></i> Профиль
                                     </a></li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <form method="post" action="{% url 'logout' %}" style="display: inline;">
+                                    <form method="post" action="{% url 'logout' %}" class="w-100">
                                         {% csrf_token %}
-                                        <button type="submit" class="dropdown-item text-danger" style="border: none; background: none; padding: 0;">
-                                            <i class="fas fa-sign-out-alt"></i> Выйти
+                                        <button type="submit" class="dropdown-item text-danger d-flex align-items-center w-100"
+                                                style="border: none; background: none;">
+                                            <i class="fas fa-sign-out-alt me-2"></i> Выйти
                                         </button>
                                     </form>
                                 </li>
@@ -196,14 +327,14 @@
         </div>
     </nav>
 
-    <main class="container">
+    <main class="container-fluid"> <!-- Изменил на container-fluid для лучшего использования ширины -->
         {% if messages %}
         <div class="row">
             <div class="col-12">
                 {% for message in messages %}
                 <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                     {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Закрыть"></button>
                 </div>
                 {% endfor %}
             </div>
@@ -216,8 +347,7 @@
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <!-- Информация и контакты -->
-                <div class="col-md-6">
+                <div class="col-md-6 col-12"> <!-- Добавил классы для мобильных -->
                     <div class="footer-section">
                         <h5>О магазине</h5>
                         <p class="mb-2">Gadgetia - покупаем и реализуем электронику и инструменты</p>
@@ -240,19 +370,18 @@
                     </div>
                 </div>
 
-                <!-- Соцсети -->
-                <div class="col-md-6">
+                <div class="col-md-6 col-12"> <!-- Добавил классы для мобильных -->
                     <div class="footer-section">
                         <h5>Мы в соцсетях</h5>
                         <ul class="footer-links">
                             <li>
-                                <a href="https://vk.com/tehnikakn" target="_blank">
+                                <a href="https://vk.com/tehnikakn" target="_blank" rel="noopener">
                                     <i class="fab fa-vk me-2"></i>ВКонтакте
                                 </a>
                             </li>
                             <li>
                                 <a href="https://www.avito.ru/brands/f97f766490fdf51a7ac0979f5862da7c/all?gdlkerfdnwq=101&page_from=from_item_card&iid=7642892784&sellerId=fe89df6deab6245effd23be5b9f26b0f"
-                                   target="_blank">
+                                   target="_blank" rel="noopener">
                                     <i class="fas fa-store me-2"></i>Avito магазин
                                 </a>
                             </li>
@@ -303,8 +432,31 @@
                         // Находим количество товаров в избранном
                         const favoritesCount = temp.querySelectorAll('.favorite-btn').length;
                         updateFavoriteCounter(favoritesCount);
+                    })
+                    .catch(error => {
+                        console.error('Ошибка при загрузке избранного:', error);
                     });
             {% endif %}
+
+            // Улучшение для мобильного меню
+            const navbarToggler = document.querySelector('.navbar-toggler');
+            const navbarContent = document.getElementById('navbarContent');
+
+            if (navbarToggler && navbarContent) {
+                navbarToggler.addEventListener('click', function() {
+                    const isExpanded = this.getAttribute('aria-expanded') === 'true';
+                    this.setAttribute('aria-expanded', !isExpanded);
+                });
+            }
+        });
+
+        // Обработчик изменения размера окна
+        window.addEventListener('resize', function() {
+            // Закрываем выпадающие меню при изменении размера окна
+            const dropdowns = document.querySelectorAll('.dropdown-menu.show');
+            dropdowns.forEach(function(dropdown) {
+                dropdown.classList.remove('show');
+            });
         });
     </script>
 
