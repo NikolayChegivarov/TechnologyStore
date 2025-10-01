@@ -59,6 +59,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # Для сбора статистики посещения сайта.
+    # 'store_project.middleware.analytics_middleware.AnalyticsMiddleware',
     # Кастомный middleware для проверки прав доступа на основе ролей пользователя
     # Автоматически перенаправляет пользователей на нужные страницы и блокирует неавторизованный доступ
     'store_project.middleware.custom_middleware1.RoleMiddleware',

@@ -465,3 +465,33 @@ class ActionLog(models.Model):
 
     def __str__(self):
         return f"{self.user} {self.get_action_type_display()} {self.product_name}"
+
+
+class PageView(models.Model):
+    """Модель для отслеживания посещений страниц"""
+    user = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Пользователь"
+    )
+    session_key = models.CharField(max_length=40, db_index=True, verbose_name="Ключ сессии")
+    url = models.CharField(max_length=500, verbose_name="URL страницы")
+    referer = models.CharField(max_length=500, blank=True, null=True, verbose_name="Источник")
+    ip_address = models.GenericIPAddressField(verbose_name="IP адрес")
+    user_agent = models.TextField(blank=True, null=True, verbose_name="User Agent")
+    timestamp = models.DateTimeField(default=timezone.now, verbose_name="Время посещения")
+    duration = models.PositiveIntegerField(default=0, verbose_name="Длительность (сек)")
+
+    class Meta:
+        verbose_name = "Просмотр страницы"
+        verbose_name_plural = "Просмотры страниц"
+        ordering = ['-timestamp']
+        indexes = [
+            models.Index(fields=['session_key', 'timestamp']),
+            models.Index(fields=['timestamp']),
+        ]
+
+    def __str__(self):
+        return f"{self.url} - {self.timestamp.strftime('%Y-%m-%d %H:%M')}"

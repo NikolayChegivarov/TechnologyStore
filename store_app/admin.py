@@ -1,6 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Manager, Store, Category, ActionLog
+from .models import User, Manager, Store, Category, ActionLog, PageView
+
+from django.db.models import Count, Avg
+from django.utils import timezone
+from datetime import timedelta
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -39,6 +43,7 @@ class StoreAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('created_at', 'updated_at')
+
 
 class CustomUserAdmin(UserAdmin):
     """
@@ -102,8 +107,8 @@ class CustomUserAdmin(UserAdmin):
             obj.save()
 
 
-@admin.register(ActionLog)
 class ActionLogAdmin(admin.ModelAdmin):
+    """Админ-панель для журнала действий пользователей с товарами."""
     list_display = ('user', 'action_type', 'product_name', 'product_id', 'timestamp', 'format_changed_fields')
     list_filter = ('action_type', 'user', 'timestamp')
     search_fields = ('product_name', 'user__username')
@@ -120,6 +125,37 @@ class ActionLogAdmin(admin.ModelAdmin):
     format_changed_fields.short_description = "Изменённые поля"
 
 
+class PageViewAdmin(admin.ModelAdmin):
+    """Админ-панель для статистики посещений сайта"""
+    list_display = ('url', 'user', 'ip_address', 'timestamp', 'duration')
+    list_filter = ('timestamp', 'url')
+    readonly_fields = ('timestamp', 'duration', 'user_agent')
+    date_hierarchy = 'timestamp'
+
+    def changelist_view(self, request, extra_context=None):
+        # Добавляем статистику в контекст
+        extra_context = extra_context or {}
+
+        # Статистика за последние 30 дней
+        thirty_days_ago = timezone.now() - timedelta(days=30)
+
+        stats = {
+            'total_visits': PageView.objects.count(),
+            'unique_visitors': PageView.objects.values('session_key').distinct().count(),
+            'avg_duration': PageView.objects.aggregate(avg=Avg('duration'))['avg'] or 0,
+            'recent_visits': PageView.objects.filter(timestamp__gte=thirty_days_ago).count(),
+            'popular_pages': PageView.objects.values('url').annotate(
+                visits=Count('id')
+            ).order_by('-visits')[:10],
+        }
+
+        extra_context['stats'] = stats
+        return super().changelist_view(request, extra_context=extra_context)
+
+
+# Регистрируем все модели ЕДИНООБРАЗНО через admin.site.register()
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Store, StoreAdmin)
 admin.site.register(User, CustomUserAdmin)
+admin.site.register(ActionLog, ActionLogAdmin)
+admin.site.register(PageView, PageViewAdmin)
