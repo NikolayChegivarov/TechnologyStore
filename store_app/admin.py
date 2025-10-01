@@ -133,32 +133,19 @@ class PageViewAdmin(admin.ModelAdmin):
     date_hierarchy = 'timestamp'
 
     def changelist_view(self, request, extra_context=None):
-        # Добавляем статистику в контекст
+        print("=== МЕТОД changelist_view ВЫЗВАН ===")
+        print(f"Запрос: {request.path}")
+
+        # Простая статистика без сложных запросов
+        total = PageView.objects.count()
+        print(f"Всего записей: {total}")
+
         extra_context = extra_context or {}
+        extra_context['title'] = f"Статистика ({total} посещений)"
 
-        # Статистика за последние 30 дней
-        thirty_days_ago = timezone.now() - timedelta(days=30)
-
-        stats = {
-            'total_visits': PageView.objects.count(),
-            'unique_visitors': PageView.objects.values('session_key').distinct().count(),
-            'avg_duration': PageView.objects.aggregate(avg=Avg('duration'))['avg'] or 0,
-            'recent_visits': PageView.objects.filter(timestamp__gte=thirty_days_ago).count(),
-            'popular_pages': PageView.objects.values('url').annotate(
-                visits=Count('id')
-            ).order_by('-visits')[:10],
-        }
-
-        # ДЛЯ ОТЛАДКИ - выведем статистику в консоль
-        print("=== СТАТИСТИКА ===")
-        print(f"Всего посещений: {stats['total_visits']}")
-        print(f"Уникальных посетителей: {stats['unique_visitors']}")
-        print(f"Средняя длительность: {stats['avg_duration']}")
-        print(f"За 30 дней: {stats['recent_visits']}")
-        print("==================")
-
-        extra_context['stats'] = stats
-        return super().changelist_view(request, extra_context=extra_context)
+        result = super().changelist_view(request, extra_context=extra_context)
+        print("=== МЕТОД changelist_view ЗАВЕРШЕН ===")
+        return result
 
 
 # Регистрируем все модели ЕДИНООБРАЗНО через admin.site.register()
