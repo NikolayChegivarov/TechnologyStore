@@ -1,3 +1,6 @@
+import sys
+print("=== admin.py ЗАГРУЖЕН ===", file=sys.stderr)
+sys.stderr.flush()
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import User, Manager, Store, Category, ActionLog, PageView
@@ -134,6 +137,7 @@ class PageViewAdmin(admin.ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         print("=== МЕТОД changelist_view ВЫЗВАН ===")
+        sys.stderr.flush()
         print(f"Запрос: {request.path}")
 
         # Простая статистика без сложных запросов
