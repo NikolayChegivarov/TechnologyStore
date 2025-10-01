@@ -149,6 +149,14 @@ class PageViewAdmin(admin.ModelAdmin):
             ).order_by('-visits')[:10],
         }
 
+        # ДЛЯ ОТЛАДКИ - выведем статистику в консоль
+        print("=== СТАТИСТИКА ===")
+        print(f"Всего посещений: {stats['total_visits']}")
+        print(f"Уникальных посетителей: {stats['unique_visitors']}")
+        print(f"Средняя длительность: {stats['avg_duration']}")
+        print(f"За 30 дней: {stats['recent_visits']}")
+        print("==================")
+
         extra_context['stats'] = stats
         return super().changelist_view(request, extra_context=extra_context)
 
