@@ -47,19 +47,19 @@ def manager_dashboard(request):
 
 
 def home(request):
+    print("=== HOME VIEW CALLED ===")
+    print("GET параметры:", dict(request.GET))
+    print("AJAX запрос:", request.headers.get('X-Requested-With'))
+
     # Получаем все уникальные города
     cities = Store.objects.values_list('city', flat=True).distinct().order_by('city')
-
-    # Получаем все категории, отсортированные по имени
     categories = Category.objects.all().order_by('name')
-
-    # Получаем все филиалы, отсортированные по городу и адресу
     stores = Store.objects.all().order_by('city', 'address')
 
-    # Начальный запрос для доступных товаров
+    # Базовый запрос
     products = Product.objects.filter(available=True).select_related('category', 'store')
 
-    # Получаем параметры фильтрации из GET-запроса
+    # Параметры
     selected_city = request.GET.get('city')
     selected_store = request.GET.get('store')
     selected_category = request.GET.get('category')
@@ -68,33 +68,26 @@ def home(request):
     # Применяем фильтры
     if selected_city:
         products = products.filter(store__city=selected_city)
-        stores = stores.filter(city=selected_city)
-
     if selected_store:
         products = products.filter(store_id=selected_store)
-
     if selected_category:
         products = products.filter(category_id=selected_category)
 
-    # Количество товаров на страницу
     products_per_page = 12
-
-    # Определяем, является ли это AJAX-запросом
     is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
 
-    # Если это AJAX-запрос для пагинации, возвращаем только товары
+    print(f"Всего товаров после фильтров: {products.count()}")
+    print(f"Страница: {page}, AJAX: {is_ajax}")
+
+    # AJAX запрос для подгрузки
     if is_ajax and page > 1:
+        print("Обрабатываем AJAX запрос")
         start_index = (page - 1) * products_per_page
         end_index = start_index + products_per_page
-
-        # Получаем товары для текущей страницы
         paginated_products = list(products[start_index:end_index])
 
-        # Проверяем, есть ли еще товары
-        total_products = products.count()
-        has_more = (page * products_per_page) < total_products
+        print(f"Загружаем товары с {start_index} по {end_index}: {len(paginated_products)} шт.")
 
-        # Получаем список избранных товаров для авторизованного пользователя
         user_favorites = []
         if request.user.is_authenticated and request.user.role == 'CUSTOMER' and hasattr(request.user,
                                                                                          'customer_profile'):
@@ -109,22 +102,10 @@ def home(request):
 
         return render(request, 'home_products_partial.html', context)
 
-    # Первоначальная загрузка страницы (не AJAX)
-    initial_products = products
-    if not any([selected_city, selected_store, selected_category]):
-        # Если нет фильтров, показываем случайные товары для первой страницы
-        product_count = products.count()
-        if product_count > products_per_page:
-            product_ids = list(products.values_list('id', flat=True))
-            random_ids = random.sample(product_ids, products_per_page)
-            initial_products = products.filter(id__in=random_ids)
-        else:
-            initial_products = products[:products_per_page]
-    else:
-        # Если есть фильтры, берем первые N товаров
-        initial_products = products[:products_per_page]
+    # Первая загрузка страницы
+    initial_products = products[:products_per_page]
+    print(f"Первоначальная загрузка: {len(initial_products)} товаров")
 
-    # Получаем список избранных товаров для авторизованного пользователя
     user_favorites = []
     if request.user.is_authenticated and request.user.role == 'CUSTOMER' and hasattr(request.user, 'customer_profile'):
         user_favorites = FavoriteProduct.objects.filter(
