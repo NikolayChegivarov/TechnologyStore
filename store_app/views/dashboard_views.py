@@ -79,12 +79,20 @@ def home(request):
     # Количество товаров на страницу
     products_per_page = 12
 
+    # Определяем, является ли это AJAX-запросом
+    is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
     # Если это AJAX-запрос для пагинации, возвращаем только товары
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or page > 1:
+    if is_ajax and page > 1:
         start_index = (page - 1) * products_per_page
         end_index = start_index + products_per_page
 
+        # Получаем товары для текущей страницы
         paginated_products = list(products[start_index:end_index])
+
+        # Проверяем, есть ли еще товары
+        total_products = products.count()
+        has_more = (page * products_per_page) < total_products
 
         # Получаем список избранных товаров для авторизованного пользователя
         user_favorites = []
