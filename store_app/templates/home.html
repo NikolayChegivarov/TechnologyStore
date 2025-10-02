@@ -388,6 +388,9 @@ $(document).ready(function() {
 
     // Настройка бесконечного скролла
     setupInfiniteScroll();
+
+    // Проверяем, нужно ли сразу загрузить следующую страницу
+    checkIfNeedMoreContent();
 });
 
 function updateCurrentFilters() {
@@ -405,18 +408,30 @@ function setupInfiniteScroll() {
     $(window).on('scroll', function() {
         clearTimeout(scrollTimeout);
         scrollTimeout = setTimeout(function() {
-            if (isLoading || !hasMore) return;
-
-            const scrollTop = $(window).scrollTop();
-            const windowHeight = $(window).height();
-            const documentHeight = $(document).height();
-            const scrollThreshold = 500; // Загружать за 500px до конца
-
-            if (scrollTop + windowHeight >= documentHeight - scrollThreshold) {
-                loadMoreProducts();
-            }
+            checkScrollPosition();
         }, 100);
     });
+}
+
+function checkScrollPosition() {
+    if (isLoading || !hasMore) return;
+
+    const scrollTop = $(window).scrollTop();
+    const windowHeight = $(window).height();
+    const documentHeight = $(document).height();
+    const scrollThreshold = 300; // Загружать за 300px до конца
+
+    // Если контента мало и мы уже внизу страницы
+    if (scrollTop + windowHeight >= documentHeight - scrollThreshold) {
+        loadMoreProducts();
+    }
+}
+
+function checkIfNeedMoreContent() {
+    // Если высота документа меньше высоты окна, загружаем больше контента
+    if ($(document).height() <= $(window).height() && hasMore && !isLoading) {
+        loadMoreProducts();
+    }
 }
 
 function loadMoreProducts() {
@@ -433,12 +448,23 @@ function loadMoreProducts() {
     $.ajax({
         url: '{% url "home" %}?' + params.toString(),
         method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        },
         success: function(data) {
-            const $newContent = $(data).find('.product-item');
+            if (data.trim()) {
+                const $newContent = $(data).find('.product-item');
 
-            if ($newContent.length > 0) {
-                $('#products-container').append($newContent);
-                initializeFavoriteButtons($newContent.find('.favorite-btn'));
+                if ($newContent.length > 0) {
+                    $('#products-container').append($newContent);
+                    initializeFavoriteButtons($newContent.find('.favorite-btn'));
+
+                    // Проверяем, нужно ли еще загружать контент
+                    setTimeout(checkIfNeedMoreContent, 100);
+                } else {
+                    hasMore = false;
+                    $('#end-of-results').show();
+                }
             } else {
                 hasMore = false;
                 $('#end-of-results').show();
@@ -519,9 +545,6 @@ $('#filter-form').on('submit', function() {
     isLoading = false;
     $('#end-of-results').hide();
     updateCurrentFilters();
-
-    // Очищаем контейнер, так как страница перезагрузится
-    $('#products-container').empty();
 });
 </script>
 {% endblock %}
