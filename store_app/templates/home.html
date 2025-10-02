@@ -546,5 +546,36 @@ $('#filter-form').on('submit', function() {
     $('#end-of-results').hide();
     updateCurrentFilters();
 });
+
+
+<!-- Отладочная информация (можно удалить после тестирования) -->
+<div style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; z-index: 1000; font-size: 12px;">
+    <div>Текущая страница: <span id="debug-page">1</span></div>
+    <div>Загрузка: <span id="debug-loading">нет</span></div>
+    <div>Есть еще: <span id="debug-hasmore">да</span></div>
+    <button onclick="loadMoreProducts()" style="margin-top: 5px;">Принудительная загрузка</button>
+</div>
+
+<script>
+// Обновление отладочной информации
+function updateDebugInfo() {
+    $('#debug-page').text(currentPage);
+    $('#debug-loading').text(isLoading ? 'да' : 'нет');
+    $('#debug-hasmore').text(hasMore ? 'да' : 'нет');
+}
+
+// Перехватчик для AJAX-запросов
+$(document).ajaxSend(function() {
+    isLoading = true;
+    updateDebugInfo();
+});
+
+$(document).ajaxComplete(function() {
+    isLoading = false;
+    updateDebugInfo();
+});
+
+// Инициализация отладочной информации
+updateDebugInfo();
 </script>
 {% endblock %}
