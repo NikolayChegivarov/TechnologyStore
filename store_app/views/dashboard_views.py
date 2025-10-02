@@ -63,6 +63,7 @@ def home(request):
     selected_city = request.GET.get('city')
     selected_store = request.GET.get('store')
     selected_category = request.GET.get('category')
+    page = int(request.GET.get('page', 1))
 
     # Применяем фильтры
     if selected_city:
@@ -75,15 +76,44 @@ def home(request):
     if selected_category:
         products = products.filter(category_id=selected_category)
 
-    # Если нет фильтров, показываем случайные 12 товаров
+    # Количество товаров на страницу
+    products_per_page = 12
+
+    # Если это AJAX-запрос для пагинации, возвращаем только товары
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or page > 1:
+        start_index = (page - 1) * products_per_page
+        end_index = start_index + products_per_page
+
+        paginated_products = products[start_index:end_index]
+
+        # Получаем список избранных товаров для авторизованного пользователя
+        user_favorites = []
+        if request.user.is_authenticated and request.user.role == 'CUSTOMER' and hasattr(request.user,
+                                                                                         'customer_profile'):
+            user_favorites = FavoriteProduct.objects.filter(
+                user=request.user.customer_profile
+            ).values_list('product_id', flat=True)
+
+        context = {
+            'products': paginated_products,
+            'user_favorites': list(user_favorites),
+        }
+
+        return render(request, 'home_products_partial.html', context)
+
+    # Первоначальная загрузка страницы (не AJAX)
     if not any([selected_city, selected_store, selected_category]):
+        # Если нет фильтров, показываем случайные товары для первой страницы
         product_count = products.count()
-        if product_count > 12:
+        if product_count > products_per_page:
             product_ids = list(products.values_list('id', flat=True))
-            random_ids = random.sample(product_ids, 12)
+            random_ids = random.sample(product_ids, products_per_page)
             products = products.filter(id__in=random_ids)
         else:
-            products = products.order_by('?')[:12]
+            products = products[:products_per_page]
+    else:
+        # Если есть фильтры, берем первые N товаров
+        products = products[:products_per_page]
 
     # Получаем список избранных товаров для авторизованного пользователя
     user_favorites = []

@@ -96,8 +96,6 @@ missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 if missing_vars:
     print(f"Ошибка: Отсутствуют следующие переменные окружения: {', '.join(missing_vars)}", file=sys.stderr)
     sys.exit(1)
-else:
-    print("Все необходимые переменные окружения доступны в settings.py")
 
 DATABASES = {
     'default': {

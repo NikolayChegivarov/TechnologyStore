@@ -142,6 +142,35 @@
     display: flex; /* Flexbox для выравнивания */
     flex-direction: column; /* Вертикальное направление */
 }
+
+/* Стили для индикатора загрузки */
+.loading-indicator {
+    display: none;
+    text-align: center;
+    padding: 2rem;
+}
+
+.loading-spinner {
+    width: 3rem;
+    height: 3rem;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #55759c;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.end-of-results {
+    text-align: center;
+    padding: 2rem;
+    color: #6c757d;
+    font-style: italic;
+}
 </style>
 
 <div class="container mt-5">
@@ -159,7 +188,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="get" action="{% url 'home' %}">
+                    <form method="get" action="{% url 'home' %}" id="filter-form">
                         <div class="row">
                             <div class="col-md-4">
                                 <label for="city" class="form-label">Город</label>
@@ -206,10 +235,10 @@
     </div>
 
     <!-- Карточки товаров -->
-    <div class="row">
+    <div id="products-container">
         {% if products %}
             {% for product in products %}
-                <div class="col-md-6 mb-4">
+                <div class="col-md-6 mb-4 product-item">
                     <div class="card h-100 product-card">
                         <div class="row g-0">
                             <!-- Изображение товара -->
@@ -300,12 +329,131 @@
             </div>
         {% endif %}
     </div>
+
+    <!-- Индикатор загрузки -->
+    <div id="loading-indicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <p>Загрузка товаров...</p>
+    </div>
+
+    <!-- Сообщение о конце результатов -->
+    <div id="end-of-results" class="end-of-results" style="display: none;">
+        <p>Все товары загружены</p>
+    </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-$(document).on('click', '.favorite-btn', function() {
+let currentPage = 1;
+let isLoading = false;
+let hasMore = true;
+let currentFilters = {};
+
+$(document).ready(function() {
+    // Инициализация кнопок избранного
+    $('.favorite-btn').each(function() {
+        const btn = $(this);
+        const initialState = btn.data('initial-state');
+        const icon = btn.find('i');
+
+        if (initialState === 'active') {
+            icon.removeClass('far').addClass('fas');
+            btn.addClass('active');
+        } else {
+            icon.removeClass('fas').addClass('far');
+            btn.removeClass('active');
+        }
+    });
+
+    // Сохраняем текущие фильтры
+    updateCurrentFilters();
+
+    // Настройка бесконечного скролла
+    setupInfiniteScroll();
+});
+
+function updateCurrentFilters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentFilters = {
+        city: urlParams.get('city') || '',
+        store: urlParams.get('store') || '',
+        category: urlParams.get('category') || ''
+    };
+}
+
+function setupInfiniteScroll() {
+    $(window).on('scroll', function() {
+        if (isLoading || !hasMore) return;
+
+        const scrollTop = $(window).scrollTop();
+        const windowHeight = $(window).height();
+        const documentHeight = $(document).height();
+        const scrollThreshold = 200; // Загружать за 200px до конца
+
+        if (scrollTop + windowHeight >= documentHeight - scrollThreshold) {
+            loadMoreProducts();
+        }
+    });
+}
+
+function loadMoreProducts() {
+    if (isLoading || !hasMore) return;
+
+    isLoading = true;
+    currentPage++;
+
+    $('#loading-indicator').show();
+
+    const params = new URLSearchParams(currentFilters);
+    params.append('page', currentPage);
+
+    $.ajax({
+        url: '{% url "home" %}?' + params.toString(),
+        method: 'GET',
+        success: function(data) {
+            const $newContent = $(data).find('#products-container .product-item');
+
+            if ($newContent.length > 0) {
+                $('#products-container').append($newContent);
+                initializeFavoriteButtons($newContent);
+            } else {
+                hasMore = false;
+                $('#end-of-results').show();
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Ошибка загрузки товаров:', error);
+            hasMore = false;
+            $('#end-of-results').show().html('<p>Произошла ошибка при загрузке товаров</p>');
+        },
+        complete: function() {
+            isLoading = false;
+            $('#loading-indicator').hide();
+        }
+    });
+}
+
+function initializeFavoriteButtons($elements) {
+    $elements.find('.favorite-btn').each(function() {
+        const btn = $(this);
+        const initialState = btn.data('initial-state');
+        const icon = btn.find('i');
+
+        if (initialState === 'active') {
+            icon.removeClass('far').addClass('fas');
+            btn.addClass('active');
+        } else {
+            icon.removeClass('fas').addClass('far');
+            btn.removeClass('active');
+        }
+    });
+
+    // Перепривязываем обработчики событий для новых кнопок
+    $elements.find('.favorite-btn').off('click').on('click', handleFavoriteClick);
+}
+
+function handleFavoriteClick() {
     const btn = $(this);
     const productId = btn.data('product-id');
     const csrfToken = $('input[name="csrfmiddlewaretoken"]').val() || '{{ csrf_token }}';
@@ -341,22 +489,18 @@ $(document).on('click', '.favorite-btn', function() {
             alert(error);
         }
     });
-});
+}
 
-$(document).ready(function() {
-    $('.favorite-btn').each(function() {
-        const btn = $(this);
-        const initialState = btn.data('initial-state');
-        const icon = btn.find('i');
+// Обработчик для кнопок избранного
+$(document).on('click', '.favorite-btn', handleFavoriteClick);
 
-        if (initialState === 'active') {
-            icon.removeClass('far').addClass('fas');
-            btn.addClass('active');
-        } else {
-            icon.removeClass('fas').addClass('far');
-            btn.removeClass('active');
-        }
-    });
+// Сброс состояния при изменении фильтров
+$('#filter-form').on('submit', function() {
+    currentPage = 1;
+    hasMore = true;
+    isLoading = false;
+    $('#end-of-results').hide();
+    updateCurrentFilters();
 });
 </script>
 {% endblock %}

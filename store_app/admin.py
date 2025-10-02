@@ -1,5 +1,4 @@
 import sys
-print("=== admin.py ЗАГРУЖЕН ===", file=sys.stderr)
 sys.stderr.flush()
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin

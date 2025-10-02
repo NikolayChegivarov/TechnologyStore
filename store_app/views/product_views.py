@@ -168,3 +168,4 @@ def edit_product(request, pk):
         'form': form,
         'product': product
     })
+
