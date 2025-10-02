@@ -76,8 +76,8 @@ def home(request):
     if selected_category:
         products = products.filter(category_id=selected_category)
 
-    # Количество товаров на страницу
-    products_per_page = 12
+    # Количество товаров на страницу - теперь 9 для 3 колонок
+    products_per_page = 9
 
     # Если это AJAX-запрос для пагинации, возвращаем только товары
     if request.headers.get('X-Requested-With') == 'XMLHttpRequest' or page > 1:
@@ -102,18 +102,8 @@ def home(request):
         return render(request, 'home_products_partial.html', context)
 
     # Первоначальная загрузка страницы (не AJAX)
-    if not any([selected_city, selected_store, selected_category]):
-        # Если нет фильтров, показываем случайные товары для первой страницы
-        product_count = products.count()
-        if product_count > products_per_page:
-            product_ids = list(products.values_list('id', flat=True))
-            random_ids = random.sample(product_ids, products_per_page)
-            products = products.filter(id__in=random_ids)
-        else:
-            products = products[:products_per_page]
-    else:
-        # Если есть фильтры, берем первые N товаров
-        products = products[:products_per_page]
+    # Всегда берем первые N товаров, без случайной выборки
+    products = products[:products_per_page]
 
     # Получаем список избранных товаров для авторизованного пользователя
     user_favorites = []
@@ -121,12 +111,6 @@ def home(request):
         user_favorites = FavoriteProduct.objects.filter(
             user=request.user.customer_profile
         ).values_list('product_id', flat=True)
-
-    favorite_count = 0
-    if request.user.is_authenticated and request.user.role == 'CUSTOMER':
-        favorite_count = FavoriteProduct.objects.filter(
-            user=request.user.customer_profile
-        ).count()
 
     context = {
         'products': products,
