@@ -63,6 +63,8 @@ def home(request):
     selected_city = request.GET.get('city')
     selected_store = request.GET.get('store')
     selected_category = request.GET.get('category')
+    price_min = request.GET.get('price_min')
+    price_max = request.GET.get('price_max')
     page = int(request.GET.get('page', 1))
 
     # Применяем фильтры
@@ -75,6 +77,12 @@ def home(request):
 
     if selected_category:
         products = products.filter(category_id=selected_category)
+
+    # Фильтрация по цене
+    if price_min:
+        products = products.filter(price__gte=price_min)
+    if price_max:
+        products = products.filter(price__lte=price_max)
 
     # Количество товаров на страницу
     products_per_page = 12
@@ -123,6 +131,8 @@ def home(request):
         'selected_city': selected_city,
         'selected_store': selected_store,
         'selected_category': selected_category,
+        'selected_price_min': price_min,  # Добавляем для сохранения состояния полей
+        'selected_price_max': price_max,  # Добавляем для сохранения состояния полей
         'user_favorites': list(user_favorites),
     }
 

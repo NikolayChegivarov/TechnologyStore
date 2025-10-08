@@ -218,8 +218,9 @@
             <div class="card">
                 <div class="card-body">
                     <form method="get" action="{% url 'home' %}" id="filter-form">
-                        <div class="row">
-                            <div class="col-md-4">
+                        <!-- Первая строка: Город и Категория -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
                                 <label for="city" class="form-label">Город</label>
                                 <select class="form-select" id="city" name="city">
                                     <option value="">Все города</option>
@@ -228,16 +229,7 @@
                                     {% endfor %}
                                 </select>
                             </div>
-                            <div class="col-md-4">
-                                <label for="store" class="form-label">Филиал</label>
-                                <select class="form-select" id="store" name="store">
-                                    <option value="">Все филиалы</option>
-                                    {% for store in stores %}
-                                        <option value="{{ store.id }}" {% if selected_store == store.id|stringformat:"s" %}selected{% endif %}>{{ store.address }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-4">
+                            <div class="col-md-6">
                                 <label for="category" class="form-label">Категория</label>
                                 <select class="form-select" id="category" name="category">
                                     <option value="">Все категории</option>
@@ -247,6 +239,44 @@
                                 </select>
                             </div>
                         </div>
+
+                        <!-- Вторая строка: Филиал и Цена -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="store" class="form-label">Филиал</label>
+                                <select class="form-select" id="store" name="store">
+                                    <option value="">Все филиалы</option>
+                                    {% for store in stores %}
+                                        <option value="{{ store.id }}" {% if selected_store == store.id|stringformat:"s" %}selected{% endif %}>{{ store.address }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Цена, ₽</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <input type="number"
+                                               class="form-control"
+                                               id="price_min"
+                                               name="price_min"
+                                               placeholder="От"
+                                               min="0"
+                                               value="{{ selected_price_min|default:'' }}">
+                                    </div>
+                                    <div class="col-6">
+                                        <input type="number"
+                                               class="form-control"
+                                               id="price_max"
+                                               name="price_max"
+                                               placeholder="До"
+                                               min="0"
+                                               value="{{ selected_price_max|default:'' }}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Кнопки -->
                         <div class="row mt-3">
                             <div class="col-md-12 text-center">
                                 <button type="submit" class="btn btn-primary me-2">
@@ -365,10 +395,6 @@
         <p>Загрузка товаров...</p>
     </div>
 
-    <!-- Сообщение о конце результатов -->
-    <div id="end-of-results" class="end-of-results" style="display: none;">
-        <p>Все товары загружены</p>
-    </div>
 </div>
 {% endblock %}
 
