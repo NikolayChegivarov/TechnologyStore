@@ -129,26 +129,47 @@ class ActionLogAdmin(admin.ModelAdmin):
 
 class PageViewAdmin(admin.ModelAdmin):
     """Админ-панель для статистики посещений сайта"""
-    list_display = ('url', 'user', 'ip_address', 'timestamp', 'duration')
-    list_filter = ('timestamp', 'url')
+    list_display = ('url', 'user', 'ip_address', 'timestamp', 'duration', 'is_manager_visit')
+    list_filter = ('timestamp', 'url', 'user__role')
     readonly_fields = ('timestamp', 'duration', 'user_agent')
     date_hierarchy = 'timestamp'
+    change_list_template = "admin/analytics/pageview/change_list.html"
+
+    def is_manager_visit(self, obj):
+        """Показывает, является ли посещение от менеджера"""
+        manager_ips = PageView.get_manager_ips()
+        if obj.ip_address in manager_ips:
+            return "✅ Менеджер"
+        return "👤 Клиент"
+
+    is_manager_visit.short_description = "Тип посетителя"
 
     def changelist_view(self, request, extra_context=None):
-        print("=== МЕТОД changelist_view ВЫЗВАН ===")
-        sys.stderr.flush()
-        print(f"Запрос: {request.path}")
-
-        # Простая статистика без сложных запросов
-        total = PageView.objects.count()
-        print(f"Всего записей: {total}")
-
         extra_context = extra_context or {}
-        extra_context['title'] = f"Статистика ({total} посещений)"
 
-        result = super().changelist_view(request, extra_context=extra_context)
-        print("=== МЕТОД changelist_view ЗАВЕРШЕН ===")
-        return result
+        # Статистика за сегодня
+        today_visitors = PageView.get_today_unique_visitors()
+
+        # Статистика за последние 30 дней
+        visitor_stats = PageView.get_unique_visitors_stats(days=30)
+
+        # Дополнительная статистика
+        total_visits = PageView.objects.count()
+        manager_ips = PageView.get_manager_ips()
+        manager_visits = PageView.objects.filter(ip_address__in=manager_ips).count()
+        client_visits = total_visits - manager_visits
+
+        extra_context.update({
+            'title': "Статистика посещений",
+            'today_visitors': today_visitors,
+            'visitor_stats': visitor_stats,
+            'total_visits': total_visits,
+            'manager_visits': manager_visits,
+            'client_visits': client_visits,
+            'total_days': len(visitor_stats),
+        })
+
+        return super().changelist_view(request, extra_context=extra_context)
 
 
 # Регистрируем все модели ЕДИНООБРАЗНО через admin.site.register()

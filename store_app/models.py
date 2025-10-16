@@ -493,5 +493,101 @@ class PageView(models.Model):
             models.Index(fields=['timestamp']),
         ]
 
+    @classmethod
+    def get_unique_visitors_stats(cls, days=30):
+        """
+        Статистика уникальных посетителей по дням (исключая менеджеров)
+        """
+        from django.db.models import Count, Q
+        from django.utils import timezone
+        from datetime import timedelta
+
+        start_date = timezone.now() - timedelta(days=days)
+
+        stats = cls.objects.filter(
+            timestamp__gte=start_date
+        ).exclude(
+            Q(user__role='MANAGER') | Q(user__role='ADMIN')
+        ).extra(
+            {'date': "DATE(timestamp)"}
+        ).values('date').annotate(
+            unique_visitors=Count('session_key', distinct=True)
+        ).order_by('date')
+
+        return list(stats)
+
+    @classmethod
+    def get_today_unique_visitors(cls):
+        """
+        Количество уникальных посетителей за сегодня
+        """
+        from django.db.models import Q
+        from django.utils import timezone
+
+        today = timezone.now().date()
+
+        return cls.objects.filter(
+            timestamp__date=today
+        ).exclude(
+            Q(user__role='MANAGER') | Q(user__role='ADMIN')
+        ).values('session_key').distinct().count()
+
+    @classmethod
+    def get_unique_visitors_stats(cls, days=30):
+        """
+        Статистика уникальных посетителей по дням (исключая менеджеров по IP)
+        """
+        from django.db.models import Count, Q
+        from django.utils import timezone
+        from datetime import timedelta
+
+        start_date = timezone.now() - timedelta(days=days)
+
+        # Получаем IP адреса менеджеров и админов
+        manager_ips = cls.objects.filter(
+            Q(user__role='MANAGER') | Q(user__role='ADMIN')
+        ).values_list('ip_address', flat=True).distinct()
+
+        stats = cls.objects.filter(
+            timestamp__gte=start_date
+        ).exclude(
+            ip_address__in=manager_ips  # Исключаем по IP
+        ).extra(
+            {'date': "DATE(timestamp)"}
+        ).values('date').annotate(
+            unique_visitors=Count('session_key', distinct=True)
+        ).order_by('date')
+
+        return list(stats)
+
+    @classmethod
+    def get_today_unique_visitors(cls):
+        """
+        Количество уникальных посетителей за сегодня (исключая менеджеров по IP)
+        """
+        from django.db.models import Q
+        from django.utils import timezone
+
+        today = timezone.now().date()
+
+        # Получаем IP адреса менеджеров и админов
+        manager_ips = cls.objects.filter(
+            Q(user__role='MANAGER') | Q(user__role='ADMIN')
+        ).values_list('ip_address', flat=True).distinct()
+
+        return cls.objects.filter(
+            timestamp__date=today
+        ).exclude(
+            ip_address__in=manager_ips  # Исключаем по IP
+        ).values('session_key').distinct().count()
+
+    @classmethod
+    def get_manager_ips(cls):
+        """Получить список IP адресов менеджеров и админов"""
+        from django.db.models import Q
+        return list(cls.objects.filter(
+            Q(user__role='MANAGER') | Q(user__role='ADMIN')
+        ).values_list('ip_address', flat=True).distinct())
+
     def __str__(self):
         return f"{self.url} - {self.timestamp.strftime('%Y-%m-%d %H:%M')}"
