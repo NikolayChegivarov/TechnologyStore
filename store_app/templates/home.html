@@ -126,6 +126,19 @@
     margin-bottom: 0.5rem !important;
 }
 
+/* Стиль для кликабельного названия товара */
+.product-title-link {
+    cursor: pointer;
+    transition: color 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+}
+
+.product-title-link:hover {
+    color: #55759c !important;
+    text-decoration: underline;
+}
+
 /* Блок с кнопками действий */
 .d-flex.flex-column.align-items-end {
     flex-shrink: 0;
@@ -319,7 +332,11 @@
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div class="flex-grow-1">
                                             <h5 class="card-title">
-                                                {{ product.name }}
+                                                <a href="{% url 'product_detail' id=product.id slug=product.slug %}"
+                                                   class="product-title-link"
+                                                   title="Перейти к подробной информации о товаре">
+                                                    {{ product.name }}
+                                                </a>
                                             </h5>
                                         </div>
                                         <div class="d-flex flex-column align-items-end">
@@ -331,14 +348,9 @@
                                                     <i class="{% if product.id in user_favorites %}fas{% else %}far{% endif %} fa-star"></i>
                                                 </button>
                                             {% endif %}
-                                            <a href="{% url 'product_detail' id=product.id slug=product.slug %}"
-                                               class="btn btn-sm btn-outline-primary mb-2"
-                                               title="Подробная информация о товаре">
-                                                <i class="fas fa-info-circle"></i> Детали
-                                            </a>
                                             {% if product.external_url %}
                                                 <a href="{{ product.external_url }}" target="_blank" class="btn btn-sm btn-success" id="product-link-{{ product.id }}">
-                                                    <i class="fas fa-external-link-alt me-1"></i>Перейти в магазин
+                                                    <i class="fas fa-external-link-alt me-1"></i>Приобрести на Авито
                                                 </a>
                                             {% endif %}
                                         </div>
