@@ -50,6 +50,8 @@
                                     <span>{{ product.store }}</span>
                                 </div>
 
+                                <!-- Информация только для менеджеров -->
+                                {% if user.is_authenticated and user.role == 'MANAGER' %}
                                 <div class="d-flex align-items-center mb-2">
                                     <span class="badge bg-secondary me-2">Доступность</span>
                                     <span>
@@ -74,6 +76,7 @@
                                     </a>
                                 </div>
                                 {% endif %}
+                                {% endif %}
                             </div>
 
                             <!-- Описание товара -->
@@ -86,9 +89,9 @@
                                 {% endif %}
                             </div>
 
-                            <!-- Кнопки действий -->
+                            <!-- Кнопки действий только для менеджеров -->
+                            {% if user.is_authenticated and user.role == 'MANAGER' %}
                             <div class="d-flex flex-wrap gap-2">
-                                {% if user.is_authenticated and user.role == 'MANAGER' %}
                                 <a href="{% url 'create_product' %}" class="btn btn-primary">
                                     <i class="fas fa-plus me-1"></i> Создать новый
                                 </a>
@@ -100,8 +103,8 @@
                                 <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
                                     <i class="fas fa-trash me-1"></i> Удалить
                                 </button>
-                                {% endif %}
                             </div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -110,7 +113,7 @@
     </div>
 </div>
 
-<!-- Модальное окно подтверждения удаления -->
+<!-- Модальное окно подтверждения удаления только для менеджеров -->
 {% if user.is_authenticated and user.role == 'MANAGER' %}
 <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
     <div class="modal-dialog">
