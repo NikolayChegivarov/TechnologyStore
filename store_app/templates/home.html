@@ -58,17 +58,35 @@
     color: white !important;
 }
 
-/* Кнопка "Перейти в магазин" с бледно-сиреневым акцентом */
+/* Кнопка "Приобрести на Авито" в стиле Авито */
 .btn-success {
-    background-color: #9575cd !important;
-    border-color: #b39ddb !important;
+    background-color: #00a7fa !important;
+    border-color: #00a7fa !important;
     color: white !important;
+    border-radius: 14px !important; /* Еще больше */
+    padding: 12px 32px !important;
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    min-width: 220px !important;
+    text-align: center !important;
+    transition: all 0.3s ease !important;
 }
 
-/* Состояние кнопки "В магазин" при наведении */
 .btn-success:hover {
-    background-color: #8B5CF6 !important;
-    border-color: #B19CD9 !important;
+    background-color: #0088cc !important;
+    border-color: #0088cc !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 20px rgba(0, 167, 250, 0.4) !important;
+    border-radius: 12px !important; /* Не забываем для ховера */
+}
+
+/* Для мобильных устройств - адаптируем размер */
+@media (max-width: 768px) {
+    .btn-success {
+        min-width: 160px !important;
+        padding: 8px 20px !important;
+        font-size: 0.85rem !important;
+    }
 }
 
 /* Стиль для статуса "Доступен" */
