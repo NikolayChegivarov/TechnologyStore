@@ -65,6 +65,7 @@ def home(request):
     selected_category = request.GET.get('category')
     price_min = request.GET.get('price_min')
     price_max = request.GET.get('price_max')
+    search_query = request.GET.get('search', '')  # Добавляем параметр поиска
     page = int(request.GET.get('page', 1))
 
     # Применяем фильтры
@@ -83,6 +84,10 @@ def home(request):
         products = products.filter(price__gte=price_min)
     if price_max:
         products = products.filter(price__lte=price_max)
+
+    # Поиск по названию товара
+    if search_query:
+        products = products.filter(name__icontains=search_query)
 
     # Количество товаров на страницу
     products_per_page = 12
@@ -133,6 +138,7 @@ def home(request):
         'selected_category': selected_category,
         'selected_price_min': price_min,  # Добавляем для сохранения состояния полей
         'selected_price_max': price_max,  # Добавляем для сохранения состояния полей
+        'selected_search': search_query,  # Добавляем для сохранения состояния поля поиска
         'user_favorites': list(user_favorites),
     }
 

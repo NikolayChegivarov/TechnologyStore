@@ -231,7 +231,26 @@
             <div class="card">
                 <div class="card-body">
                     <form method="get" action="{% url 'home' %}" id="filter-form">
-                        <!-- Первая строка: Город и Категория -->
+                        <!-- Первая строка: Поиск по названию -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="search" class="form-label">Поиск по названию</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control" 
+                                           id="search" 
+                                           name="search" 
+                                           placeholder="Введите название или часть названия товара..."
+                                           value="{{ selected_search|default:'' }}">
+                                </div>
+                                <div class="form-text">Поиск осуществляется по частичному совпадению с названием товара</div>
+                            </div>
+                        </div>
+
+                        <!-- Вторая строка: Город и Категория -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="city" class="form-label">Город</label>
@@ -253,7 +272,7 @@
                             </div>
                         </div>
 
-                        <!-- Вторая строка: Филиал и Цена -->
+                        <!-- Третья строка: Филиал и Цена -->
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label for="store" class="form-label">Филиал</label>
@@ -332,7 +351,7 @@
                                     <div class="d-flex justify-content-between align-items-start mb-2">
                                         <div class="flex-grow-1">
                                             <h5 class="card-title">
-                                                <a href="{% url 'product_detail' id=product.id slug=product.slug %}"
+                                                <a href="{% url 'product_detail' id=product.id slug=product.slug %}" 
                                                    class="product-title-link"
                                                    title="Перейти к подробной информации о товаре">
                                                     {{ product.name }}
@@ -350,7 +369,7 @@
                                             {% endif %}
                                             {% if product.external_url %}
                                                 <a href="{{ product.external_url }}" target="_blank" class="btn btn-sm btn-success" id="product-link-{{ product.id }}">
-                                                    <i class="fas fa-external-link-alt me-1"></i>Приобрести на Авито
+                                                    <i class="fas fa-external-link-alt me-1"></i>Перейти в магазин
                                                 </a>
                                             {% endif %}
                                         </div>
@@ -395,7 +414,7 @@
                 <div class="alert alert-info py-4">
                     <i class="fas fa-search fa-2x mb-3"></i>
                     <h5>Товары не найдены</h5>
-                    <p class="mb-0">Попробуйте изменить параметры фильтрации</p>
+                    <p class="mb-0">Попробуйте изменить параметры фильтрации или поисковый запрос</p>
                 </div>
             </div>
         {% endif %}
@@ -423,9 +442,25 @@ $(document).ready(function() {
     // Настройка бесконечного скролла
     setupInfiniteScroll();
 
+    // Автопоиск при вводе текста (опционально)
+    setupSearchAutosubmit();
+
     // Проверяем, нужно ли сразу загрузить следующую страницу
     setTimeout(checkIfNeedMoreContent, 1000);
 });
+
+function setupSearchAutosubmit() {
+    let searchTimeout;
+    const searchInput = $('#search');
+    
+    searchInput.on('input', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            // Автоматически применяем фильтры при вводе (опционально)
+            // $('#filter-form').submit();
+        }, 1000);
+    });
+}
 
 function setupInfiniteScroll() {
     let scrollTimeout;
