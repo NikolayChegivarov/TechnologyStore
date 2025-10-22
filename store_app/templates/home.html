@@ -63,7 +63,7 @@
     background-color: #00a7fa !important;
     border-color: #00a7fa !important;
     color: white !important;
-    border-radius: 14px !important; /* Еще больше */
+    border-radius: 14px !important;
     padding: 12px 32px !important;
     font-weight: 600 !important;
     font-size: 1rem !important;
@@ -77,7 +77,38 @@
     border-color: #0088cc !important;
     transform: translateY(-2px) !important;
     box-shadow: 0 6px 20px rgba(0, 167, 250, 0.4) !important;
-    border-radius: 12px !important; /* Не забываем для ховера */
+    border-radius: 12px !important;
+}
+
+/* Кнопка показа/скрытия фильтров */
+.btn-toggle-filters {
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    color: #55759c !important;
+    transition: all 0.3s ease !important;
+}
+
+.btn-toggle-filters:hover {
+    background-color: #55759c !important;
+    color: white !important;
+    transform: translateY(-1px);
+}
+
+/* Анимация для открытия/закрытия фильтров */
+.filters-container {
+    transition: all 0.3s ease-in-out;
+    overflow: hidden;
+}
+
+.filters-collapsed {
+    max-height: 0;
+    opacity: 0;
+    margin-bottom: 0 !important;
+}
+
+.filters-expanded {
+    max-height: 1000px;
+    opacity: 1;
 }
 
 /* Для мобильных устройств - адаптируем размер */
@@ -86,6 +117,14 @@
         min-width: 160px !important;
         padding: 8px 20px !important;
         font-size: 0.85rem !important;
+    }
+    
+    .brand-title {
+        font-size: 3rem;
+    }
+    
+    .brand-subtitle {
+        font-size: 1.2rem;
     }
 }
 
@@ -215,14 +254,6 @@
         grid-template-columns: 1fr;
         gap: 1rem;
     }
-
-    .brand-title {
-        font-size: 3rem;
-    }
-
-    .brand-subtitle {
-        font-size: 1.2rem;
-    }
 }
 
 /* Для очень маленьких экранов */
@@ -243,8 +274,18 @@
         </div>
     </div>
 
+    <!-- Кнопка показа/скрытия фильтров -->
+    <div class="row mb-3">
+        <div class="col-md-12 text-center">
+            <button type="button" class="btn btn-toggle-filters" id="toggle-filters-btn">
+                <i class="fas fa-filter me-1"></i>
+                <span id="toggle-filters-text">Показать фильтры</span>
+            </button>
+        </div>
+    </div>
+
     <!-- Фильтры -->
-    <div class="row mb-4">
+    <div class="row mb-4 filters-container {% if filters_applied %}filters-expanded{% else %}filters-collapsed{% endif %}" id="filters-section">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
@@ -452,32 +493,65 @@
 let currentPage = 1;
 let isLoading = false;
 let hasMore = true;
+let filtersVisible = {% if filters_applied %}true{% else %}false{% endif %};
 
 $(document).ready(function() {
     // Инициализация кнопок избранного
     initializeFavoriteButtons($('.favorite-btn'));
 
+    // Настройка переключения фильтров
+    setupFiltersToggle();
+
     // Настройка бесконечного скролла
     setupInfiniteScroll();
-
-    // Автопоиск при вводе текста (опционально)
-    setupSearchAutosubmit();
 
     // Проверяем, нужно ли сразу загрузить следующую страницу
     setTimeout(checkIfNeedMoreContent, 1000);
 });
 
-function setupSearchAutosubmit() {
-    let searchTimeout;
-    const searchInput = $('#search');
-    
-    searchInput.on('input', function() {
-        clearTimeout(searchTimeout);
-        searchTimeout = setTimeout(function() {
-            // Автоматически применяем фильтры при вводе (опционально)
-            // $('#filter-form').submit();
-        }, 1000);
+function setupFiltersToggle() {
+    const toggleBtn = $('#toggle-filters-btn');
+    const filtersSection = $('#filters-section');
+    const toggleText = $('#toggle-filters-text');
+    const toggleIcon = toggleBtn.find('i');
+
+    // Устанавливаем начальное состояние на основе серверной переменной
+    updateFiltersUI();
+
+    toggleBtn.on('click', function() {
+        filtersVisible = !filtersVisible;
+        updateFiltersUI();
+        
+        // Сохраняем состояние в sessionStorage
+        try {
+            sessionStorage.setItem('filtersVisible', filtersVisible);
+        } catch (e) {
+            console.log('Не удалось сохранить состояние фильтров');
+        }
     });
+
+    function updateFiltersUI() {
+        if (filtersVisible) {
+            filtersSection.removeClass('filters-collapsed').addClass('filters-expanded');
+            toggleText.text('Скрыть фильтры');
+            toggleIcon.removeClass('fa-filter').addClass('fa-times');
+        } else {
+            filtersSection.removeClass('filters-expanded').addClass('filters-collapsed');
+            toggleText.text('Показать фильтры');
+            toggleIcon.removeClass('fa-times').addClass('fa-filter');
+        }
+    }
+
+    // Восстанавливаем состояние из sessionStorage при загрузке (если нет фильтров)
+    try {
+        const savedState = sessionStorage.getItem('filtersVisible');
+        if (savedState !== null && !{% if filters_applied %}true{% else %}false{% endif %}) {
+            filtersVisible = savedState === 'true';
+            updateFiltersUI();
+        }
+    } catch (e) {
+        console.log('Не удалось восстановить состояние фильтров');
+    }
 }
 
 function setupInfiniteScroll() {
@@ -552,7 +626,6 @@ function loadMoreProducts() {
         error: function(xhr, status, error) {
             console.error('Ошибка загрузки товаров:', error);
             hasMore = false;
-            $('#end-of-results').show().html('<p>Произошла ошибка при загрузке товаров</p>');
         },
         complete: function() {
             isLoading = false;
@@ -622,7 +695,34 @@ $('#filter-form').on('submit', function() {
     currentPage = 1;
     hasMore = true;
     isLoading = false;
-    $('#end-of-results').hide();
+    
+    // При применении фильтров оставляем их открытыми
+    filtersVisible = true;
+    updateFiltersUI();
+    
+    // Сохраняем состояние
+    try {
+        sessionStorage.setItem('filtersVisible', 'true');
+    } catch (e) {
+        console.log('Не удалось сохранить состояние фильтров');
+    }
 });
+
+// Функция для обновления UI фильтров
+function updateFiltersUI() {
+    const filtersSection = $('#filters-section');
+    const toggleText = $('#toggle-filters-text');
+    const toggleIcon = $('#toggle-filters-btn').find('i');
+
+    if (filtersVisible) {
+        filtersSection.removeClass('filters-collapsed').addClass('filters-expanded');
+        toggleText.text('Скрыть фильтры');
+        toggleIcon.removeClass('fa-filter').addClass('fa-times');
+    } else {
+        filtersSection.removeClass('filters-expanded').addClass('filters-collapsed');
+        toggleText.text('Показать фильтры');
+        toggleIcon.removeClass('fa-times').addClass('fa-filter');
+    }
+}
 </script>
 {% endblock %}
