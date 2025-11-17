@@ -289,7 +289,7 @@
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <form method="get" action="{% url 'home' %}" id="filter-form">
+                    <form method="get" action="{% url 'buy' %}" id="filter-form">
                         <!-- Первая строка: Поиск по названию -->
                         <div class="row mb-3">
                             <div class="col-md-12">
@@ -373,7 +373,7 @@
                                 <button type="submit" class="btn btn-primary me-2">
                                     <i class="fas fa-filter me-1"></i>Применить фильтры
                                 </button>
-                                <a href="{% url 'home' %}" class="btn btn-outline-secondary">
+                                <a href="{% url 'buy' %}" class="btn btn-outline-secondary">
                                     <i class="fas fa-redo me-1"></i>Сбросить
                                 </a>
                             </div>
@@ -595,7 +595,7 @@ function loadMoreProducts() {
     params.set('page', nextPage);
 
     $.ajax({
-        url: '{% url "home" %}?' + params.toString(),
+        url: '{% url "buy" %}?' + params.toString(),
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'

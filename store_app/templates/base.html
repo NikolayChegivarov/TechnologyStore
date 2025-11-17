@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Магазин электроники{% endblock %}</title>
+    <title>{% block title %}Gadgetia - Магазин электроники{% endblock %}</title>
 
     <!-- Favicon и иконки -->
     <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicon/apple-touch-icon.png' %}">
@@ -38,27 +38,27 @@
 
         main {
             flex: 1 0 auto;
-            background-color: rgba(255, 255, 255, 0.95); /* Увеличил прозрачность для лучшей читаемости */
+            background-color: rgba(255, 255, 255, 0.95);
             border-radius: 10px;
-            padding: 15px; /* Уменьшил отступы для мобильных */
-            margin: 15px 10px; /* Уменьшил отступы по краям */
+            padding: 15px;
+            margin: 15px 10px;
         }
 
         .navbar-brand {
             font-weight: bold;
-            font-size: 1.1rem; /* Увеличил для мобильных */
+            font-size: 1.1rem;
         }
 
         .footer {
             background-color: #f8f9fa;
-            padding: 20px 0 15px; /* Уменьшил отступы */
+            padding: 20px 0 15px;
             margin-top: 30px;
             border-top: 1px solid #dee2e6;
-            font-size: 0.9rem; /* Уменьшил размер шрифта */
+            font-size: 0.9rem;
         }
 
         .user-avatar {
-            width: 35px; /* Уменьшил для мобильных */
+            width: 35px;
             height: 35px;
             border-radius: 50%;
         }
@@ -72,7 +72,7 @@
             position: absolute;
             top: -5px;
             right: -5px;
-            font-size: 10px; /* Уменьшил размер */
+            font-size: 10px;
             padding: 3px 6px;
         }
 
@@ -97,7 +97,7 @@
         }
 
         .footer-links a:hover {
-            color: #007bff;
+            color: #55759c;
         }
 
         .social-links {
@@ -113,7 +113,33 @@
         }
 
         .social-links a:hover {
-            color: #007bff;
+            color: #55759c;
+        }
+
+        /* Брендовые цвета */
+        .navbar-brand, .nav-link.active {
+            color: #55759c !important;
+        }
+
+        .nav-link:hover {
+            color: #466187 !important;
+        }
+
+        .btn-primary {
+            background-color: #55759c !important;
+            border-color: #55759c !important;
+        }
+
+        .btn-primary:hover {
+            background-color: #466187 !important;
+            border-color: #466187 !important;
+        }
+
+        /* Активная ссылка в навигации */
+        .nav-link.active {
+            font-weight: 600;
+            background-color: rgba(85, 117, 156, 0.1);
+            border-radius: 5px;
         }
 
         /* Мобильные стили */
@@ -196,13 +222,11 @@
                 margin-bottom: 8px;
             }
 
-            /* Улучшение для кнопок в выпадающем меню */
             .dropdown-item {
                 padding: 10px 15px;
                 font-size: 0.95rem;
             }
 
-            /* Улучшение для кнопки выхода */
             .dropdown-item button {
                 width: 100%;
                 text-align: left;
@@ -213,7 +237,7 @@
         /* Улучшение касания для мобильных */
         @media (max-width: 768px) {
             .nav-link, .dropdown-item, .btn {
-                min-height: 44px; /* Минимальная высота для удобного касания */
+                min-height: 44px;
                 display: flex;
                 align-items: center;
             }
@@ -245,7 +269,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3"> <!-- Уменьшил margin-bottom -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light mb-3">
         <div class="container">
             <a class="navbar-brand" href="{% url 'home' %}">
                 <i class="fas fa-mobile-alt"></i> Gadgetia
@@ -257,23 +281,34 @@
             </button>
 
             <div class="collapse navbar-collapse" id="navbarContent">
+                <!-- Основная навигация -->
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'home' %}">
-                            <i class="fas fa-home"></i> Главная
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' or request.resolver_match.url_name == 'buy' %}active{% endif %}"
+                           href="{% url 'home' %}">
+                            <i class="fas fa-shopping-cart"></i> Купить
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'sell' %}active{% endif %}"
+                           href="{% url 'sell' %}">
+                            <i class="fas fa-cash-register"></i> Продать
                         </a>
                     </li>
                     {% if user.is_authenticated and user.role == 'MANAGER' %}
                     <li class="nav-item">
-                        <a class="nav-link" href="{% url 'manager_dashboard' %}">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'manager_dashboard' %}active{% endif %}"
+                           href="{% url 'manager_dashboard' %}">
                             <i class="fas fa-tachometer-alt"></i> Интерфейс менеджера
                         </a>
                     </li>
                     {% endif %}
                 </ul>
 
+                <!-- Правая часть навигации -->
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center">
                     {% if user.is_authenticated %}
+                        <!-- Счетчик избранного -->
                         <li class="nav-item favorite-counter">
                             <a class="nav-link position-relative" href="{% url 'favorites' %}" title="Избранное">
                                 <i class="fas fa-star"></i>
@@ -284,6 +319,7 @@
                             </a>
                         </li>
 
+                        <!-- Меню пользователя -->
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown"
                                role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -300,9 +336,16 @@
                             </a>
                             <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                                 {% if user.role == 'CUSTOMER' %}
-                                    <li><a class="dropdown-item d-flex align-items-center" href="{% url 'customer_dashboard' %}">
-                                        <i class="fas fa-user-circle me-2"></i> Профиль
-                                    </a></li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'customer_dashboard' %}">
+                                            <i class="fas fa-user-circle me-2"></i> Профиль
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item d-flex align-items-center" href="{% url 'favorites' %}">
+                                            <i class="fas fa-star me-2"></i> Избранное
+                                        </a>
+                                    </li>
                                 {% endif %}
                                 <li><hr class="dropdown-divider"></li>
                                 <li>
@@ -317,6 +360,7 @@
                             </ul>
                         </li>
                     {% else %}
+                        <!-- Ссылки для неавторизованных пользователей (закомментированы) -->
                         <!--
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'login' %}">
@@ -335,7 +379,7 @@
         </div>
     </nav>
 
-    <main class="container-fluid"> <!-- Изменил на container-fluid для лучшего использования ширины -->
+    <main class="container-fluid">
         {% if messages %}
         <div class="row">
             <div class="col-12">
@@ -355,7 +399,7 @@
     <footer class="footer">
         <div class="container">
             <div class="row">
-                <div class="col-md-6 col-12"> <!-- Добавил классы для мобильных -->
+                <div class="col-md-6 col-12">
                     <div class="footer-section">
                         <h5>О магазине</h5>
                         <p class="mb-2">Gadgetia - покупаем и реализуем электронику и инструменты</p>
@@ -378,7 +422,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-6 col-12"> <!-- Добавил классы для мобильных -->
+                <div class="col-md-6 col-12">
                     <div class="footer-section">
                         <h5>Мы в соцсетях</h5>
                         <ul class="footer-links">
@@ -456,6 +500,33 @@
                     this.setAttribute('aria-expanded', !isExpanded);
                 });
             }
+
+            // Подсветка активной ссылки в навигации
+            function highlightActiveNavLink() {
+                const currentPath = window.location.pathname;
+                const navLinks = document.querySelectorAll('.nav-link');
+
+                navLinks.forEach(link => {
+                    const linkPath = link.getAttribute('href');
+                    // Проверяем главную страницу и страницу покупок
+                    if ((currentPath === '/' && linkPath === '/') ||
+                        (currentPath === '/buy/' && linkPath === '/') ||
+                        (currentPath === linkPath)) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            // Вызываем при загрузке и при изменении истории (для SPA-поведения)
+            highlightActiveNavLink();
+            window.addEventListener('popstate', highlightActiveNavLink);
+
+            // Обработчик для AJAX-навигации
+            $(document).on('ajaxComplete', function() {
+                setTimeout(highlightActiveNavLink, 100);
+            });
         });
 
         // Обработчик изменения размера окна
@@ -466,6 +537,12 @@
                 dropdown.classList.remove('show');
             });
         });
+
+        // Глобальная функция для AJAX-навигации
+        function navigateTo(url) {
+            history.pushState(null, null, url);
+            document.dispatchEvent(new Event('DOMContentLoaded'));
+        }
     </script>
 
     {% block extra_js %}{% endblock %}

@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .sell-hero {
+        background: linear-gradient(135deg, #55759c 0%, #6B8E61 100%);
+        color: white;
+        padding: 4rem 0;
+        text-align: center;
+        margin: -15px -10px 30px;
+        border-radius: 0 0 10px 10px;
+    }
+
+    .sell-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+    }
+
+    .sell-subtitle {
+        font-size: 1.5rem;
+        font-weight: 300;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .feature-card {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s ease;
+    }
+
+    .feature-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .feature-icon {
+        font-size: 3rem;
+        color: #55759c;
+        margin-bottom: 1rem;
+    }
+
+    .contact-info {
+        background: #f8f9fa;
+        padding: 3rem;
+        border-radius: 10px;
+        margin-top: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .sell-title {
+            font-size: 2.5rem;
+        }
+        
+        .sell-subtitle {
+            font-size: 1.2rem;
+        }
+        
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<div class="sell-hero">
+    <div class="container">
+        <h1 class="sell-title">Купим вашу технику и инструменты</h1>
+        <p class="sell-subtitle">Выгодно, быстро, безопасно</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <!-- Преимущества -->
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <h3>Выгодная цена</h3>
+                    <p>Предлагаем конкурентные цены за вашу технику после бесплатной оценки</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <h3>Мгновенная оплата</h3>
+                    <p>Оплачиваем сразу наличными после осмотра товара</p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Безопасная сделка</h3>
+                    <p>Все сделки проходят официально с заключением договора</p>
+                </div>
+            </div>
+
+            <!-- Что покупаем -->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h4 class="mb-0"><i class="fas fa-mobile-alt me-2"></i>Техника</h4>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Смартфоны и планшеты</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Ноутбуки и компьютеры</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Web камеры и видеорегистраторы</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Игровые консоли</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Аудиотехника</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Телевизоры и мониторы</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0"><i class="fas fa-tools me-2"></i>Инструменты</h4>
+                        </div>
+                        <div class="card-body">
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-check text-success me-2"></i> Электроинструменты</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Ручные инструменты</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Измерительные приборы</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Садовую технику</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Строительное оборудование</li>
+                                <li><i class="fas fa-check text-success me-2"></i> Профессиональный инструмент</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Инструкция -->
+            <div class="contact-info text-center">
+                <h3 class="mb-4">Как продать технику?</h3>
+                <div class="row justify-content-center">
+                    <div class="col-md-5 mb-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-store text-primary"></i>
+                        </div>
+                        <h5>Приезжайте в наш филиал</h5>
+                        <p class="text-muted">Для оценки и осмотра техники</p>
+                    </div>
+                    <div class="col-md-5 mb-4">
+                        <div class="feature-icon mb-3">
+                            <i class="fas fa-money-bill-wave text-primary"></i>
+                        </div>
+                        <h5>Получите деньги</h5>
+                        <p class="text-muted">Мгновенная оплата после сделки</p>
+                    </div>
+                </div>
+
+                <div class="mt-5 pt-4 border-top">
+                    <h5 class="mb-3">Продать вашу технику вы сможете в наших филиалах</h5>
+                    <a href="{% url 'contacts_view' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-map-marker-alt me-2"></i>Посмотреть адреса филиалов
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

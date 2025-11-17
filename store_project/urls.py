@@ -23,7 +23,7 @@ from django.views.generic import TemplateView
 
 from store_app.views.auth_views import login_view, CustomerSignUpView, ManagerSignUpView
 from store_app.views.dashboard_views import manager_dashboard, get_stores_by_city, \
-    customer_profile, home, ContactsView
+    customer_profile, home, ContactsView, buy_page, sell_page
 from store_app.views.favorite_views import favorites_view, toggle_favorite
 from store_app.views.product_views import create_product, delete_products, \
     deactivate_products, edit_product, product_detail # product_list,
@@ -31,16 +31,19 @@ from store_project import settings
 
 urlpatterns = [
     path('', home, name='home'),
+    path('buy/', buy_page, name='buy'),
+    path('sell/', sell_page, name='sell'),
+
     path('get-stores/', get_stores_by_city, name='get_stores_by_city'),
 
     path('login/', login_view, name='login'), # Вход пользователя.
     path('logout/', LogoutView.as_view(next_page='home'), name='logout'),  # Разлогиниться.
     path('signup/', CustomerSignUpView.as_view(), name='signup'),  # Сортирует пользователя, направляет на его стр.
-    path('signup/customer/', CustomerSignUpView.as_view(), name='customer_signup'), # Регистрация покупателя.
+    path('signup/customer/', CustomerSignUpView.as_view(), name='customer_signup'), # Регистрация покупателя.  (Не используется)
     path('signup/manager/', ManagerSignUpView.as_view(), name='manager_signup'),  # Регистрация менеджера(панель админа).
 
     # Подвал
-    path('home/contacts/', ContactsView, name='contacts_view'), # Контакты
+    path('home/contacts/', ContactsView, name='contacts_view'), # Филиалы
     path('privacy/', TemplateView.as_view(template_name='templates/basement/privacy.html'), name='privacy_policy'),  # (Не используется)
 
     # Dashboard URLs
