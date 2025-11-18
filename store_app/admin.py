@@ -29,7 +29,7 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class StoreAdmin(admin.ModelAdmin):
     """Админ-интерфейс для управления магазинами (филиалами):"""
-    list_display = ('city', 'address', 'created_at', 'updated_at')
+    list_display = ('city', 'address', 'latitude', 'longitude', 'created_at', 'updated_at')
     search_fields = ('city', 'address')
     list_filter = ('city', 'created_at')
     ordering = ('city', 'address')
@@ -37,6 +37,10 @@ class StoreAdmin(admin.ModelAdmin):
     fieldsets = (
         (None, {
             'fields': ('city', 'address')
+        }),
+        ('Координаты для карты', {
+            'fields': ('latitude', 'longitude'),
+            'description': 'Координаты для отображения на карте. Можно оставить пустыми.'
         }),
         ('Дополнительная информация', {
             'fields': ('created_at', 'updated_at'),

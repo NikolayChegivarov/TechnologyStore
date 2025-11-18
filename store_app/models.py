@@ -27,6 +27,18 @@ class Store(models.Model):  # Филиалы
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Координаты - основа для карты
+    latitude = models.FloatField(
+        verbose_name='Широта',
+        null=True,
+        blank=True
+    )
+    longitude = models.FloatField(
+        verbose_name='Долгота',
+        null=True,
+        blank=True
+    )
+
     def __str__(self):
         return f"{self.city}, {self.address}"
 
