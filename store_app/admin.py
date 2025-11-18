@@ -3,6 +3,9 @@ import sys
 sys.stderr.flush()
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django import forms
+from django.forms import BaseInlineFormSet
+from django.utils.html import format_html
 from .models import User, Manager, Store, Category, ActionLog, PageView, WorkingHours
 
 from django.db.models import Count, Avg
@@ -10,33 +13,78 @@ from django.utils import timezone
 from datetime import timedelta
 
 
+# -------------------------- КАСТОМНЫЕ ФОРМЫ ДЛЯ РАСПИСАНИЯ -------------------------
+class WorkingHoursForm(forms.ModelForm):
+    """Кастомная форма для времени с предустановленными значениями"""
+
+    opening_time = forms.ChoiceField(
+        choices=[
+            ('', '---------'),
+            ('07:00:00', '07:00'),
+            ('08:00:00', '08:00'),
+            ('09:00:00', '09:00'),
+            ('10:00:00', '10:00'),
+            ('11:00:00', '11:00'),
+        ],
+        required=False,
+        label='Время открытия'
+    )
+
+    closing_time = forms.ChoiceField(
+        choices=[
+            ('', '---------'),
+            ('18:00:00', '18:00'),
+            ('19:00:00', '19:00'),
+            ('20:00:00', '20:00'),
+            ('21:00:00', '21:00'),
+            ('22:00:00', '22:00'),
+        ],
+        required=False,
+        label='Время закрытия'
+    )
+
+    class Meta:
+        model = WorkingHours
+        fields = '__all__'
+
+
+class WorkingHoursFormSet(BaseInlineFormSet):
+    """Кастомный FormSet для автоматического создания дней недели"""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        instance = kwargs.get('instance')
+
+        # Если это новый магазин (нет primary key)
+        if instance is None or instance.pk is None:
+            # Создаем начальные данные для всех дней недели
+            self.initial = [
+                {'day_of_week': day, 'is_closed': False}
+                for day in range(7)
+            ]
+            self.extra = 7
+
+
 class WorkingHoursInline(admin.TabularInline):
-    """Редактирование расписания"""
+    """Режим работы в виде inline в магазине"""
     model = WorkingHours
-    extra = 0
-    min_num = 7  # Все дни недели
-    max_num = 7
+    form = WorkingHoursForm
+    formset = WorkingHoursFormSet
+    extra = 7  # Показываем все 7 дней недели
+    max_num = 7  # Не больше 7 дней
     can_delete = False
 
     def get_formset(self, request, obj=None, **kwargs):
-        formset = super().get_formset(request, obj, **kwargs)
-        # Устанавливаем дни недели по порядку
-        if obj and not obj.working_hours.exists():
-            for day in range(7):
-                WorkingHours.objects.get_or_create(
-                    store=obj,
-                    day_of_week=day,
-                    defaults={
-                        'opening_time': None,
-                        'closing_time': None,
-                        'is_closed': True
-                    }
-                )
-        return formset
+        """Автоматически создаем все дни недели для нового магазина"""
+        if obj is None or obj.pk is None:
+            kwargs['formset'] = WorkingHoursFormSet
+        return super().get_formset(request, obj, **kwargs)
 
 
 class WorkingHoursAdmin(admin.ModelAdmin):
-    """Управления расписанием"""
+    """Управление расписанием"""
+    form = WorkingHoursForm
     list_display = ('store', 'day_of_week_display', 'opening_time', 'closing_time', 'is_closed', 'is_open_today')
     list_filter = ('store', 'day_of_week', 'is_closed')
     search_fields = ('store__city', 'store__address')
@@ -65,7 +113,7 @@ class WorkingHoursAdmin(admin.ModelAdmin):
         today = timezone.now().weekday()
         if obj.day_of_week == today:
             current_time = timezone.now().time()
-            if obj.opening_time <= current_time <= obj.closing_time:
+            if obj.opening_time and obj.closing_time and obj.opening_time <= current_time <= obj.closing_time:
                 return "✅ Открыт сейчас"
             return "⏰ Закрыт сейчас"
         return "📅 По расписанию"
@@ -74,7 +122,7 @@ class WorkingHoursAdmin(admin.ModelAdmin):
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    """Управления категориями товаров:"""
+    """Управление категориями товаров:"""
     list_display = ('name', 'created_at', 'updated_at')
     search_fields = ('name',)
     ordering = ('name',)
@@ -92,22 +140,28 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class StoreAdmin(admin.ModelAdmin):
-    """Управления магазинами (филиалами):"""
-    list_display = ('city', 'address', 'latitude', 'longitude', 'created_at', 'updated_at', 'is_open_now_display')
+    """Управление магазинами (филиалами):"""
+    list_display = ('city', 'address', 'latitude', 'longitude', 'created_at', 'updated_at', 'is_open_now_display', 'working_hours_preview')
     search_fields = ('city', 'address')
     list_filter = ('city', 'created_at')
     ordering = ('city', 'address')
+    readonly_fields = ('created_at', 'updated_at', 'working_hours_preview')
 
-    # Добавляем встроенное редактирование расписания
+    # Добавляем встроенное редактирование расписания с кастомной формой
     inlines = [WorkingHoursInline]
 
     fieldsets = (
-        (None, {
+        ('Основная информация', {
             'fields': ('city', 'address')
         }),
         ('Координаты для карты', {
             'fields': ('latitude', 'longitude'),
             'description': 'Координаты для отображения на карте. Можно оставить пустыми.'
+        }),
+        ('Режим работы', {
+            'fields': ('working_hours_preview',),
+            'classes': ('collapse', 'wide'),
+            'description': 'Предпросмотр текущего расписания работы'
         }),
         ('Дополнительная информация', {
             'fields': ('created_at', 'updated_at'),
@@ -115,15 +169,61 @@ class StoreAdmin(admin.ModelAdmin):
         }),
     )
 
-    readonly_fields = ('created_at', 'updated_at')
-
     def is_open_now_display(self, obj):
         """Отображает статус магазина прямо в списке"""
         if obj.is_open_now():
-            return "✅ Открыт"
-        return "❌ Закрыт"
+            return format_html('<span style="color: green; font-weight: bold;">✅ Открыт</span>')
+        return format_html('<span style="color: red; font-weight: bold;">❌ Закрыт</span>')
 
     is_open_now_display.short_description = 'Статус сейчас'
+
+    def working_hours_preview(self, obj):
+        """Предпросмотр режима работы"""
+        if obj.pk:  # Проверяем, что магазин сохранен в БД
+            hours = obj.working_hours.all().order_by('day_of_week')
+            if not hours:
+                return "Режим работы не установлен"
+
+            html = '<div style="max-width: 400px; font-size: 12px;">'
+            for hour in hours:
+                if hour.is_closed:
+                    status = "❌ Выходной"
+                else:
+                    open_time = hour.opening_time.strftime('%H:%M') if hour.opening_time else '--:--'
+                    close_time = hour.closing_time.strftime('%H:%M') if hour.closing_time else '--:--'
+                    status = f"✅ {open_time} - {close_time}"
+                html += f'<div><strong>{hour.get_day_of_week_display()}:</strong> {status}</div>'
+            html += '</div>'
+            return format_html(html)
+        return "Сначала сохраните магазин, чтобы установить режим работы"
+
+    working_hours_preview.short_description = 'Текущий режим работы'
+
+    def save_related(self, request, form, formsets, change):
+        """Сохраняем связанные объекты (расписание)"""
+        # Сначала сохраняем магазин
+        super().save_related(request, form, formsets, change)
+
+        # Для нового магазина проверяем, создалось ли расписание
+        if not change:  # Если это создание нового магазина
+            store = form.instance
+
+            # Удаляем возможные дубликаты, созданные формой
+            store.working_hours.all().delete()
+
+            # Создаем правильное расписание на основе данных из формы
+            for formset in formsets:
+                if formset.model == WorkingHours:
+                    instances = formset.save(commit=False)
+                    for instance in instances:
+                        # Проверяем, что это валидная запись (не пустая форма)
+                        if instance.day_of_week is not None:
+                            instance.store = store
+                            instance.save()
+
+    def get_queryset(self, request):
+        """Оптимизация запросов"""
+        return super().get_queryset(request).prefetch_related('working_hours')
 
 
 class CustomUserAdmin(UserAdmin):
@@ -258,4 +358,4 @@ admin.site.register(Store, StoreAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(ActionLog, ActionLogAdmin)
 admin.site.register(PageView, PageViewAdmin)
-admin.site.register(WorkingHours, WorkingHoursAdmin)  # Добавляем новую админ-панель
+admin.site.register(WorkingHours, WorkingHoursAdmin)
