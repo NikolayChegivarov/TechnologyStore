@@ -1,16 +1,80 @@
 import sys
+
 sys.stderr.flush()
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import User, Manager, Store, Category, ActionLog, PageView
+from .models import User, Manager, Store, Category, ActionLog, PageView, WorkingHours
 
 from django.db.models import Count, Avg
 from django.utils import timezone
 from datetime import timedelta
 
 
+class WorkingHoursInline(admin.TabularInline):
+    """Редактирование расписания"""
+    model = WorkingHours
+    extra = 0
+    min_num = 7  # Все дни недели
+    max_num = 7
+    can_delete = False
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super().get_formset(request, obj, **kwargs)
+        # Устанавливаем дни недели по порядку
+        if obj and not obj.working_hours.exists():
+            for day in range(7):
+                WorkingHours.objects.get_or_create(
+                    store=obj,
+                    day_of_week=day,
+                    defaults={
+                        'opening_time': None,
+                        'closing_time': None,
+                        'is_closed': True
+                    }
+                )
+        return formset
+
+
+class WorkingHoursAdmin(admin.ModelAdmin):
+    """Управления расписанием"""
+    list_display = ('store', 'day_of_week_display', 'opening_time', 'closing_time', 'is_closed', 'is_open_today')
+    list_filter = ('store', 'day_of_week', 'is_closed')
+    search_fields = ('store__city', 'store__address')
+    ordering = ('store', 'day_of_week')
+
+    fieldsets = (
+        (None, {
+            'fields': ('store', 'day_of_week')
+        }),
+        ('Время работы', {
+            'fields': ('opening_time', 'closing_time', 'is_closed'),
+            'description': 'Укажите время работы или отметьте как выходной'
+        }),
+    )
+
+    def day_of_week_display(self, obj):
+        return obj.get_day_of_week_display()
+
+    day_of_week_display.short_description = 'День недели'
+
+    def is_open_today(self, obj):
+        """Показывает, открыт ли магазин сегодня по этому расписанию"""
+        if obj.is_closed:
+            return "❌ Выходной"
+
+        today = timezone.now().weekday()
+        if obj.day_of_week == today:
+            current_time = timezone.now().time()
+            if obj.opening_time <= current_time <= obj.closing_time:
+                return "✅ Открыт сейчас"
+            return "⏰ Закрыт сейчас"
+        return "📅 По расписанию"
+
+    is_open_today.short_description = 'Статус сегодня'
+
+
 class CategoryAdmin(admin.ModelAdmin):
-    """Админ-панель для управления категориями товаров:"""
+    """Управления категориями товаров:"""
     list_display = ('name', 'created_at', 'updated_at')
     search_fields = ('name',)
     ordering = ('name',)
@@ -28,11 +92,14 @@ class CategoryAdmin(admin.ModelAdmin):
 
 
 class StoreAdmin(admin.ModelAdmin):
-    """Админ-интерфейс для управления магазинами (филиалами):"""
-    list_display = ('city', 'address', 'latitude', 'longitude', 'created_at', 'updated_at')
+    """Управления магазинами (филиалами):"""
+    list_display = ('city', 'address', 'latitude', 'longitude', 'created_at', 'updated_at', 'is_open_now_display')
     search_fields = ('city', 'address')
     list_filter = ('city', 'created_at')
     ordering = ('city', 'address')
+
+    # Добавляем встроенное редактирование расписания
+    inlines = [WorkingHoursInline]
 
     fieldsets = (
         (None, {
@@ -49,6 +116,14 @@ class StoreAdmin(admin.ModelAdmin):
     )
 
     readonly_fields = ('created_at', 'updated_at')
+
+    def is_open_now_display(self, obj):
+        """Отображает статус магазина прямо в списке"""
+        if obj.is_open_now():
+            return "✅ Открыт"
+        return "❌ Закрыт"
+
+    is_open_now_display.short_description = 'Статус сейчас'
 
 
 class CustomUserAdmin(UserAdmin):
@@ -114,7 +189,7 @@ class CustomUserAdmin(UserAdmin):
 
 
 class ActionLogAdmin(admin.ModelAdmin):
-    """Админ-панель для журнала действий пользователей с товарами."""
+    """Журнал действий пользователей с товарами."""
     list_display = ('user', 'action_type', 'product_name', 'product_id', 'timestamp', 'format_changed_fields')
     list_filter = ('action_type', 'user', 'timestamp')
     search_fields = ('product_name', 'user__username')
@@ -128,11 +203,12 @@ class ActionLogAdmin(admin.ModelAdmin):
             f"{field}: {values['old']} → {values['new']}"
             for field, values in obj.changed_fields.items()
         ])
+
     format_changed_fields.short_description = "Изменённые поля"
 
 
 class PageViewAdmin(admin.ModelAdmin):
-    """Админ-панель для статистики посещений сайта"""
+    """Статистика посещений сайта"""
     list_display = ('url', 'user', 'ip_address', 'timestamp', 'duration', 'is_manager_visit')
     list_filter = ('timestamp', 'url', 'user__role')
     readonly_fields = ('timestamp', 'duration', 'user_agent')
@@ -182,3 +258,4 @@ admin.site.register(Store, StoreAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(ActionLog, ActionLogAdmin)
 admin.site.register(PageView, PageViewAdmin)
+admin.site.register(WorkingHours, WorkingHoursAdmin)  # Добавляем новую админ-панель

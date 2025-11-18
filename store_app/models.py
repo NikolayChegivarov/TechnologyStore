@@ -1,6 +1,7 @@
 # pytest tests/test_models/test_product_models.py -v
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator, MinValueValidator
+from django.core.exceptions import ValidationError
 from django.db import models
 from django.utils import timezone
 from django.utils.text import slugify
@@ -13,6 +14,50 @@ phone_validator = RegexValidator(
     regex=r'^\+?[0-9\s-]+$',
     message='Номер телефона должен содержать только цифры, пробелы и знак +'
 )
+
+class WorkingHours(models.Model):
+    """Расписание"""
+    DAYS_OF_WEEK = [
+        (0, 'Понедельник'),
+        (1, 'Вторник'),
+        (2, 'Среда'),
+        (3, 'Четверг'),
+        (4, 'Пятница'),
+        (5, 'Суббота'),
+        (6, 'Воскресенье'),
+    ]
+
+    id = models.AutoField(primary_key=True, verbose_name='ID')
+    store = models.ForeignKey(  # ЗАМЕНИТЕ branch НА store
+        'Store',  # И ссылку на 'Branch' замените на 'Store'
+        on_delete=models.CASCADE,
+        related_name='working_hours',
+        verbose_name='Филиал'
+    )
+    day_of_week = models.IntegerField(choices=DAYS_OF_WEEK, verbose_name='День недели')
+    opening_time = models.TimeField(verbose_name='Время открытия', null=True, blank=True)
+    closing_time = models.TimeField(verbose_name='Время закрытия', null=True, blank=True)
+    is_closed = models.BooleanField(default=False, verbose_name='Выходной')
+
+    class Meta:
+        verbose_name = 'Режим работы'
+        verbose_name_plural = 'Режимы работы'
+        ordering = ['store', 'day_of_week']  # Тоже замените branch на store
+        unique_together = ['store', 'day_of_week']
+
+    def clean(self):
+        if not self.is_closed:
+            if not self.opening_time or not self.closing_time:
+                raise ValidationError('Для рабочих дней необходимо указать время открытия и закрытия')
+            if self.opening_time >= self.closing_time:
+                raise ValidationError('Время открытия должно быть раньше времени закрытия')
+
+    def __str__(self):
+        if self.is_closed:
+            return f"{self.get_day_of_week_display()}: выходной"
+
+        return f"{self.get_day_of_week_display()}: {self.opening_time.strftime('%H:%M')} - {self.closing_time.strftime('%H:%M')}"
+
 
 class Store(models.Model):  # Филиалы
     city = models.CharField(max_length=255, db_index=True)
@@ -49,6 +94,28 @@ class Store(models.Model):  # Филиалы
         indexes = [
             models.Index(fields=['city', 'address']),
         ]
+
+    def get_working_hours_display(self):
+        """Возвращает отформатированное представление режима работы"""
+        hours = self.working_hours.all()
+        if not hours:
+            return "Режим работы не установлен"
+
+        return "\n".join(str(hour) for hour in hours)
+
+    def is_open_now(self):
+        """Проверяет, открыт ли филиал в текущий момент"""
+        now = timezone.now()
+        today = now.weekday()
+        current_time = now.time()
+
+        try:
+            today_hours = self.working_hours.get(day_of_week=today)
+            if today_hours.is_closed:
+                return False
+            return today_hours.opening_time <= current_time <= today_hours.closing_time
+        except WorkingHours.DoesNotExist:
+            return False
 
 
 class Category(models.Model):
