@@ -141,8 +141,8 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class StoreAdmin(admin.ModelAdmin):
     """Управление магазинами (филиалами):"""
-    list_display = ('city', 'address', 'latitude', 'longitude', 'created_at', 'updated_at', 'is_open_now_display', 'working_hours_preview')
-    search_fields = ('city', 'address')
+    list_display = ('city', 'address', 'phone', 'latitude', 'longitude', 'created_at', 'updated_at', 'is_open_now_display', 'working_hours_preview')
+    search_fields = ('city', 'address', 'phone')  # Добавьте phone в поиск
     list_filter = ('city', 'created_at')
     ordering = ('city', 'address')
     readonly_fields = ('created_at', 'updated_at', 'working_hours_preview')
@@ -152,7 +152,7 @@ class StoreAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Основная информация', {
-            'fields': ('city', 'address')
+            'fields': ('city', 'address', 'phone')  # Добавьте phone сюда
         }),
         ('Координаты для карты', {
             'fields': ('latitude', 'longitude'),
@@ -165,10 +165,11 @@ class StoreAdmin(admin.ModelAdmin):
         }),
         ('Дополнительная информация', {
             'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
+            'classes': ('collapse')
         }),
     )
 
+    # Остальные методы остаются без изменений...
     def is_open_now_display(self, obj):
         """Отображает статус магазина прямо в списке"""
         if obj.is_open_now():
@@ -224,6 +225,22 @@ class StoreAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         """Оптимизация запросов"""
         return super().get_queryset(request).prefetch_related('working_hours')
+
+    list_display = ('city', 'address', 'format_phone', 'latitude', 'longitude', 'created_at', 'updated_at',
+                    'is_open_now_display', 'working_hours_preview')
+
+    def format_phone(self, obj):
+        """Форматирует номер телефона для лучшего отображения"""
+        if obj.phone:
+            # Убираем лишние символы и форматируем
+            clean_phone = ''.join(filter(str.isdigit, obj.phone))
+            if clean_phone.startswith('7') and len(clean_phone) == 11:
+                return f"+7 ({clean_phone[1:4]}) {clean_phone[4:7]}-{clean_phone[7:9]}-{clean_phone[9:11]}"
+            elif clean_phone.startswith('8') and len(clean_phone) == 11:
+                return f"+7 ({clean_phone[1:4]}) {clean_phone[4:7]}-{clean_phone[7:9]}-{clean_phone[9:11]}"
+        return obj.phone or "—"
+
+    format_phone.short_description = 'Телефон'
 
 
 class CustomUserAdmin(UserAdmin):
