@@ -11,12 +11,12 @@
         <h1>Наши филиалы</h1>
         <div class="header-stats">
             <div class="header-stat">
-                <span class="stat-number">{{ total_branches }}</span>
                 <span class="stat-label">Филиалов</span>
+                <span class="stat-number">{{ total_branches }}</span>
             </div>
             <div class="header-stat">
-                <span class="stat-number">{{ active_branches }}</span>
                 <span class="stat-label">Открыто</span>
+                <span class="stat-number">{{ active_branches }}</span>
             </div>
         </div>
     </div>
@@ -30,7 +30,7 @@
                 <div class="city-main">
                     <span class="city-icon">🏙️</span>
                     <span class="city-name">{{ city_data.city }}</span>
-                    <span class="city-branch-count">{{ city_data.branch_count }} филиал{{ city_data.branch_count|pluralize:"а,ов" }}</span>
+                    <span class="city-branch-count">Филиалов: {{ city_data.branch_count }}</span>
                 </div>
                 <div class="city-toggle">
                     <span class="toggle-icon">▼</span>
@@ -165,7 +165,7 @@
     align-items: center;
     gap: 8px;
     padding: 12px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #55759c;
     border-radius: 8px;
     color: white;
     min-width: 120px;
@@ -213,13 +213,13 @@
 }
 
 .city-card:hover {
-    border-color: #667eea;
+    border-color: #55759c;
     transform: translateY(-2px);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    box-shadow: 0 4px 15px rgba(85, 117, 156, 0.15);
 }
 
 .city-card.active {
-    border-color: #667eea;
+    border-color: #55759c;
     background: #f8faff;
 }
 
@@ -244,7 +244,7 @@
 }
 
 .city-branch-count {
-    background: #667eea;
+    background: #55759c;
     color: white;
     padding: 6px 12px;
     border-radius: 20px;
@@ -262,7 +262,7 @@
 
 .city-card.active .city-toggle {
     transform: rotate(180deg);
-    color: #667eea;
+    color: #55759c;
 }
 
 /* Детали города */
@@ -334,12 +334,12 @@
 }
 
 .branch-compact-card:hover {
-    border-color: #667eea;
-    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+    border-color: #55759c;
+    box-shadow: 0 2px 8px rgba(85, 117, 156, 0.15);
 }
 
 .branch-compact-card.active {
-    border-color: #667eea;
+    border-color: #55759c;
     background: #f8faff;
 }
 
@@ -360,7 +360,7 @@
 
 .location-icon {
     font-size: 1.2em;
-    color: #667eea;
+    color: #55759c;
 }
 
 .location-info {
@@ -385,7 +385,7 @@
 
 .branch-compact-card.active .branch-toggle {
     transform: rotate(180deg);
-    color: #667eea;
+    color: #55759c;
 }
 
 .branch-additional-info {
@@ -445,7 +445,7 @@
 }
 
 .map-btn {
-    background: #667eea;
+    background: #55759c;
     color: white;
     border: none;
     padding: 6px 12px;
@@ -454,13 +454,13 @@
     font-size: 0.8em;
     font-weight: 500;
     transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 1px 3px rgba(85, 117, 156, 0.3);
 }
 
 .map-btn:hover {
-    background: #5a6fd8;
+    background: #466187;
     transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 2px 6px rgba(85, 117, 156, 0.4);
 }
 
 .status-indicator {
@@ -507,7 +507,7 @@
 }
 
 .schedule-day-compact:hover {
-    border-color: #667eea;
+    border-color: #55759c;
     transform: translateY(-1px);
 }
 
