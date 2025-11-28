@@ -5,3 +5,4 @@ __pycache__/
 DRAFT.md
 .coverage
 store_app/media/products/*
+store_app/migrations/*

@@ -267,17 +267,6 @@ def toggle_favorite(request):
     })
 
 
-def ContactsView(request):
-    """Контакты"""
-    # Получаем все филиалы для отображения в контактах
-    stores = Store.objects.all().order_by('city', 'address')
-
-    context = {
-        'stores': stores,
-    }
-    return render(request, 'basement/сontacts.html', context)
-
-
 # Дополнительные служебные функции
 @login_required
 def dashboard_stats(request):

@@ -69,6 +69,23 @@ class Store(models.Model):  # Филиалы
             message='Допустимы русские буквы, цифры, пробелы и знаки .,-'
         )]
     )
+    phone = models.CharField(
+        max_length=20,
+        verbose_name="Телефон",
+        blank=True,
+        null=True,
+        validators=[phone_validator]
+    )
+
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name="Активный"
+    )
+
+    description = models.TextField(
+        verbose_name="Описание",
+        blank=True
+    )
     created_at = models.DateTimeField(default=timezone.now)
     updated_at = models.DateTimeField(auto_now=True)
 

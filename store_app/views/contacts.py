@@ -1,0 +1,109 @@
+from django.shortcuts import render
+from ..models import Store, WorkingHours
+import json
+from django.utils import timezone
+from collections import defaultdict
+
+
+def branches_view(request):
+    """
+    Представление для отображения филиалов
+    """
+    try:
+        # Получаем все активные магазины
+        stores = Store.objects.filter(is_active=True).prefetch_related('working_hours')
+        active_stores_count = stores.count()
+
+        # Если нет активных магазинов
+        if active_stores_count == 0:
+            context = {
+                'cities': [],
+                'cities_json': json.dumps([], ensure_ascii=False),
+                'total_branches': 0,
+                'active_branches': 0,
+            }
+            return render(request, 'basement/branches.html', context)
+
+        # Группируем магазины по городам
+        cities_dict = defaultdict(list)
+
+        for store in stores:
+            # Получаем расписание для каждого магазина
+            schedule = []
+            working_hours = store.working_hours.all().order_by('day_of_week')
+
+            for wh in working_hours:
+                if wh.is_closed:
+                    time_str = "Выходной"
+                else:
+                    open_time = wh.opening_time.strftime('%H:%M') if wh.opening_time else '--:--'
+                    close_time = wh.closing_time.strftime('%H:%M') if wh.closing_time else '--:--'
+                    time_str = f"{open_time} - {close_time}"
+
+                schedule.append({
+                    'day': wh.get_day_of_week_display(),
+                    'time': time_str,
+                    'is_closed': wh.is_closed
+                })
+
+            # Проверяем, открыт ли магазин сейчас
+            is_open_now = store.is_open_now()
+
+            store_data = {
+                'id': store.id,
+                'city': store.city,
+                'address': store.address,
+                'phone': store.phone,
+                'description': store.description,
+                'latitude': float(store.latitude) if store.latitude else None,
+                'longitude': float(store.longitude) if store.longitude else None,
+                'schedule': schedule,
+                'is_open_now': is_open_now,
+                'status_color': 'green' if is_open_now else 'red',
+                'status_text': 'Открыт' if is_open_now else 'Закрыт'
+            }
+
+            cities_dict[store.city].append(store_data)
+
+        # Формируем данные для городов
+        cities_data = []
+        for city, city_stores in cities_dict.items():
+            cities_data.append({
+                'city': city,
+                'branch_count': len(city_stores),
+                'branches': city_stores
+            })
+
+        # Сортируем города по алфавиту
+        cities_data.sort(key=lambda x: x['city'])
+
+        # Данные для JSON (для карт)
+        cities_json_data = []
+        for city_data in cities_data:
+            branches_with_coords = [b for b in city_data['branches'] if b['latitude'] and b['longitude']]
+            cities_json_data.append({
+                'city': city_data['city'],
+                'branches': branches_with_coords
+            })
+
+        # Подготовка контекста
+        total_branches = len(stores)
+        active_branches = len([s for s in stores if s.is_open_now()])
+
+        context = {
+            'cities': cities_data,
+            'cities_json': json.dumps(cities_json_data, ensure_ascii=False),
+            'total_branches': total_branches,
+            'active_branches': active_branches,
+        }
+
+    except Exception as e:
+        # В случае ошибки возвращаем пустой контекст
+        context = {
+            'cities': [],
+            'cities_json': json.dumps([], ensure_ascii=False),
+            'total_branches': 0,
+            'active_branches': 0,
+        }
+
+    return render(request, 'basement/branches.html', context)

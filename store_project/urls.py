@@ -22,11 +22,13 @@ from django.contrib.auth.views import LogoutView
 from django.views.generic import TemplateView
 
 from store_app.views.auth_views import login_view, CustomerSignUpView, ManagerSignUpView
+from store_app.views.contacts import branches_view
 from store_app.views.dashboard_views import manager_dashboard, get_stores_by_city, \
-    customer_profile, home, ContactsView, buy_page, sell_page
+    customer_profile, home, buy_page, sell_page
 from store_app.views.favorite_views import favorites_view, toggle_favorite
 from store_app.views.product_views import create_product, delete_products, \
     deactivate_products, edit_product, product_detail # product_list,
+from store_app.views.stores import stores_view
 from store_project import settings
 
 urlpatterns = [
@@ -43,7 +45,8 @@ urlpatterns = [
     path('signup/manager/', ManagerSignUpView.as_view(), name='manager_signup'),  # Регистрация менеджера(панель админа).
 
     # Подвал
-    path('home/contacts/', ContactsView, name='contacts_view'), # Филиалы
+    path('home/contacts/', branches_view, name='contacts_view'), # Филиалы
+    path('stores/', stores_view, name='stores'),  # Новый URL для страницы филиалов
     path('privacy/', TemplateView.as_view(template_name='templates/basement/privacy.html'), name='privacy_policy'),  # (Не используется)
 
     # Dashboard URLs

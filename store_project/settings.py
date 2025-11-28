@@ -169,8 +169,7 @@ AUTHENTICATION_BACKENDS = [
 CSRF_COOKIE_SECURE = False  # Для разработки
 CSRF_COOKIE_HTTPONLY = False  # Для AJAX-запросов
 
-
-# Логирование попыток входа
+# Логирование
 LOGGING = {
     'version': 1,
     'handlers': {
