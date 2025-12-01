@@ -69,22 +69,13 @@
 
                                 <!-- Дополнительная информация филиала -->
                                 <div class="branch-additional-info" id="branch-info-{{ forloop.counter }}-{{ city_data.city }}">
-                                    <!-- Первая строка: телефон, кнопка карты, статус -->
+                                    <!-- Первая строка: телефон, статус -->
                                     <div class="info-row first-row">
                                         <div class="phone-info">
                                             <span class="info-icon">📞</span>
                                             <span class="phone-number">{{ branch.phone }}</span>
                                         </div>
                                         <div class="actions-status">
-                                            {% if branch.latitude and branch.longitude %}
-                                            <button class="map-btn"
-                                                    data-lat="{{ branch.latitude }}"
-                                                    data-lng="{{ branch.longitude }}"
-                                                    data-title="{{ branch.city }}"
-                                                    data-city-map="city-map-{{ forloop.parentloop.counter }}">
-                                                🗺️ На карте
-                                            </button>
-                                            {% endif %}
                                             <div class="status-indicator status-{{ branch.status_color }}">
                                                 {% if branch.is_open_now %}🟢{% else %}🔴{% endif %}
                                                 {{ branch.status_text }}
@@ -315,7 +306,7 @@
     font-size: 1.2em;
 }
 
-/* Остальные стили для филиалов (остаются прежними) */
+/* Остальные стили для филиалов */
 .branches-grid {
     display: flex;
     flex-direction: column;
@@ -442,25 +433,6 @@
     display: flex;
     align-items: center;
     gap: 15px;
-}
-
-.map-btn {
-    background: #55759c;
-    color: white;
-    border: none;
-    padding: 6px 12px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.8em;
-    font-weight: 500;
-    transition: all 0.3s ease;
-    box-shadow: 0 1px 3px rgba(85, 117, 156, 0.3);
-}
-
-.map-btn:hover {
-    background: #466187;
-    transform: translateY(-1px);
-    box-shadow: 0 2px 6px rgba(85, 117, 156, 0.4);
 }
 
 .status-indicator {
@@ -651,59 +623,76 @@ document.addEventListener('DOMContentLoaded', function() {
             const cityData = citiesData.find(city => city.city === cityName);
 
             if (cityData && cityData.branches.length > 0) {
-                // Определяем начальный zoom в зависимости от количества филиалов
-                let initialZoom = 12;
-                if (cityData.branches.length === 1) {
-                    initialZoom = 15; // Ближе для одного филиала
-                } else if (cityData.branches.length > 5) {
-                    initialZoom = 10; // Дальше для многих филиалов
-                }
+                console.log(`Инициализация карты для города: ${cityName}`, cityData.branches);
+
+                // Определяем центр карты как среднее арифметическое координат
+                const avgLat = cityData.branches.reduce((sum, branch) => sum + branch.latitude, 0) / cityData.branches.length;
+                const avgLng = cityData.branches.reduce((sum, branch) => sum + branch.longitude, 0) / cityData.branches.length;
 
                 const map = new ymaps.Map(mapElement.id, {
-                    center: [cityData.branches[0].latitude, cityData.branches[0].longitude],
-                    zoom: initialZoom
+                    center: [avgLat, avgLng],
+                    zoom: 11,
+                    controls: ['zoomControl', 'fullscreenControl']
                 });
 
-                const clusterer = new ymaps.Clusterer();
+                // Создаем кластеризатор
+                const clusterer = new ymaps.Clusterer({
+                    preset: 'islands#invertedBlueClusterIcons',
+                    clusterDisableClickZoom: true,
+                    clusterOpenBalloonOnClick: true,
+                    clusterBalloonContentLayout: 'cluster#balloonCarousel'
+                });
 
-                cityData.branches.forEach(function(branch) {
+                // Добавляем метки для каждого филиала
+                cityData.branches.forEach(function(branch, branchIndex) {
                     const placemark = new ymaps.Placemark(
                         [branch.latitude, branch.longitude],
                         {
-                            balloonContent: `
-                                <div style="padding: 10px; min-width: 200px;">
-                                    <h3 style="margin: 0 0 10px 0;">${branch.city}</h3>
+                            balloonContentHeader: `<strong>${branch.city}</strong>`,
+                            balloonContentBody: `
+                                <div style="padding: 5px 0;">
                                     <p><strong>📍 Адрес:</strong> ${branch.address}</p>
                                     <p><strong>📞 Телефон:</strong> ${branch.phone}</p>
-                                    <p><strong>🕒 Статус:</strong> <span style="color: ${branch.status_color}">${branch.status_text}</span></p>
+                                    <p><strong>🕒 Статус:</strong>
+                                        <span style="color: ${branch.status_color}; font-weight: bold;">
+                                            ${branch.status_text}
+                                        </span>
+                                    </p>
                                 </div>
-                            `
+                            `,
+                            balloonContentFooter: `<em>ID: ${branch.id}</em>`,
+                            hintContent: `${branch.address}`
                         },
                         {
                             preset: 'islands#icon',
-                            iconColor: branch.is_open_now ? 'green' : 'red'
+                            iconColor: branch.is_open_now ? 'green' : 'red',
+                            balloonCloseButton: true,
+                            hideIconOnBalloonOpen: false
                         }
                     );
+
+                    // Сохраняем ссылку на метку в данных ветки
+                    branch.placemark = placemark;
                     clusterer.add(placemark);
                 });
 
                 map.geoObjects.add(clusterer);
+                cityMaps[mapElement.id] = map;
 
-                // Для нескольких филиалов устанавливаем границы с ограничением по zoom
+                // Автоматически подбираем zoom чтобы показать все метки
                 if (cityData.branches.length > 1) {
                     map.setBounds(clusterer.getBounds(), {
                         checkZoomRange: true,
-                        zoomMargin: 15
-                    }).then(function() {
-                        // Ограничиваем минимальный zoom
-                        const currentZoom = map.getZoom();
-                        if (currentZoom < 10) {
-                            map.setZoom(10);
-                        }
+                        zoomMargin: 30
                     });
                 }
 
-                cityMaps[mapElement.id] = map;
+                console.log(`Карта для города ${cityName} инициализирована`);
+            } else {
+                console.warn(`Нет данных с координатами для города: ${cityName}`);
+                // Скрываем карту если нет данных
+                mapElement.style.display = 'none';
+                mapElement.previousElementSibling.style.display = 'none'; // Скрываем заголовок
             }
         });
     });
@@ -726,6 +715,14 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.toggle('active');
             if (this.classList.contains('active')) {
                 cityDetails.style.display = 'block';
+
+                // Переинициализируем карту при открытии города
+                setTimeout(() => {
+                    const mapElement = cityDetails.querySelector('.city-branches-map');
+                    if (mapElement && cityMaps[mapElement.id]) {
+                        cityMaps[mapElement.id].container.fitToViewport();
+                    }
+                }, 100);
             } else {
                 cityDetails.style.display = 'none';
             }
@@ -735,7 +732,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Переключение филиалов
     document.querySelectorAll('.branch-compact-card').forEach(function(card) {
         card.addEventListener('click', function(e) {
-            e.stopPropagation(); // Останавливаем всплытие, чтобы не закрывать город
             const branchId = this.dataset.branchId;
             const additionalInfo = document.getElementById(`branch-info-${branchId}`);
 
@@ -749,25 +745,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Переключаем текущий филиал
             this.classList.toggle('active');
-        });
-    });
-
-    // Обработчики для кнопок "На карте" в филиалах
-    document.querySelectorAll('.map-btn').forEach(function(btn) {
-        btn.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const lat = parseFloat(this.dataset.lat);
-            const lng = parseFloat(this.dataset.lng);
-            const title = this.dataset.title;
-            const cityMapId = this.dataset.cityMap;
-
-            const cityMap = cityMaps[cityMapId];
-            if (cityMap) {
-                cityMap.setCenter([lat, lng], 15, { duration: 1000 });
-                cityMap.balloon.open([lat, lng], {
-                    content: `<h3>${title}</h3><p>📍 Выбранный филиал</p>`
-                });
-            }
         });
     });
 });

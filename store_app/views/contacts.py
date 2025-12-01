@@ -49,14 +49,31 @@ def branches_view(request):
             # Проверяем, открыт ли магазин сейчас
             is_open_now = store.is_open_now()
 
+            # ВАЖНО: Проверяем корректность координат
+            latitude = None
+            longitude = None
+
+            if store.latitude and store.longitude:
+                try:
+                    lat_val = float(store.latitude)
+                    lng_val = float(store.longitude)
+                    # Проверяем, что координаты в разумных пределах для России
+                    if 40.0 <= lng_val <= 180.0 and 30.0 <= lat_val <= 80.0:
+                        latitude = lat_val
+                        longitude = lng_val
+                    else:
+                        print(f"Некорректные координаты для магазина {store.id}: {lat_val}, {lng_val}")
+                except (ValueError, TypeError) as e:
+                    print(f"Ошибка преобразования координат для магазина {store.id}: {e}")
+
             store_data = {
                 'id': store.id,
                 'city': store.city,
                 'address': store.address,
-                'phone': store.phone,
+                'phone': store.phone or 'Не указан',
                 'description': store.description,
-                'latitude': float(store.latitude) if store.latitude else None,
-                'longitude': float(store.longitude) if store.longitude else None,
+                'latitude': latitude,
+                'longitude': longitude,
                 'schedule': schedule,
                 'is_open_now': is_open_now,
                 'status_color': 'green' if is_open_now else 'red',
@@ -68,23 +85,27 @@ def branches_view(request):
         # Формируем данные для городов
         cities_data = []
         for city, city_stores in cities_dict.items():
+            # Фильтруем только магазины с корректными координатами
+            branches_with_coords = [b for b in city_stores if b['latitude'] and b['longitude']]
+
             cities_data.append({
                 'city': city,
                 'branch_count': len(city_stores),
-                'branches': city_stores
+                'branches': city_stores,
+                'branches_with_coords': branches_with_coords
             })
 
         # Сортируем города по алфавиту
         cities_data.sort(key=lambda x: x['city'])
 
-        # Данные для JSON (для карт)
+        # Данные для JSON (только магазины с координатами)
         cities_json_data = []
         for city_data in cities_data:
-            branches_with_coords = [b for b in city_data['branches'] if b['latitude'] and b['longitude']]
-            cities_json_data.append({
-                'city': city_data['city'],
-                'branches': branches_with_coords
-            })
+            if city_data['branches_with_coords']:
+                cities_json_data.append({
+                    'city': city_data['city'],
+                    'branches': city_data['branches_with_coords']
+                })
 
         # Подготовка контекста
         total_branches = len(stores)
@@ -98,7 +119,7 @@ def branches_view(request):
         }
 
     except Exception as e:
-        # В случае ошибки возвращаем пустой контекст
+        print(f"Ошибка в branches_view: {e}")
         context = {
             'cities': [],
             'cities_json': json.dumps([], ensure_ascii=False),
