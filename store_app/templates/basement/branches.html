@@ -679,20 +679,48 @@ document.addEventListener('DOMContentLoaded', function() {
                 map.geoObjects.add(clusterer);
                 cityMaps[mapElement.id] = map;
 
-                // Автоматически подбираем zoom чтобы показать все метки
-                if (cityData.branches.length > 1) {
-                    map.setBounds(clusterer.getBounds(), {
-                        checkZoomRange: true,
-                        zoomMargin: 30
-                    });
+                // Функция для установки правильных границ карты
+                function setMapBounds() {
+                    if (cityData.branches.length > 0) {
+                        // Получаем границы всех меток
+                        const bounds = clusterer.getBounds();
+
+                        if (bounds) {
+                            // Добавляем немного отступа (30 пикселей)
+                            map.setBounds(bounds, {
+                                checkZoomRange: true,
+                                zoomMargin: 30
+                            }).then(function() {
+                                console.log(`Границы карты для города ${cityName} установлены`);
+                            }, function(error) {
+                                console.warn(`Ошибка при установке границ для города ${cityName}:`, error);
+
+                                // Если не удалось установить границы, устанавливаем центральную точку
+                                if (cityData.branches.length === 1) {
+                                    const branch = cityData.branches[0];
+                                    map.setCenter([branch.latitude, branch.longitude], 15);
+                                }
+                            });
+                        } else {
+                            console.warn(`Не удалось получить границы для города ${cityName}`);
+                        }
+                    }
                 }
+
+                // Устанавливаем границы с небольшой задержкой для гарантии инициализации
+                setTimeout(setMapBounds, 500);
+
+                // Также устанавливаем границы при каждом открытии города
+                mapElement.closest('.city-details').addEventListener('cityOpened', setMapBounds);
 
                 console.log(`Карта для города ${cityName} инициализирована`);
             } else {
                 console.warn(`Нет данных с координатами для города: ${cityName}`);
                 // Скрываем карту если нет данных
                 mapElement.style.display = 'none';
-                mapElement.previousElementSibling.style.display = 'none'; // Скрываем заголовок
+                if (mapElement.previousElementSibling && mapElement.previousElementSibling.tagName === 'H4') {
+                    mapElement.previousElementSibling.style.display = 'none'; // Скрываем заголовок
+                }
             }
         });
     });
@@ -716,11 +744,30 @@ document.addEventListener('DOMContentLoaded', function() {
             if (this.classList.contains('active')) {
                 cityDetails.style.display = 'block';
 
+                // Генерируем событие открытия города
+                const cityOpenedEvent = new CustomEvent('cityOpened');
+                cityDetails.dispatchEvent(cityOpenedEvent);
+
                 // Переинициализируем карту при открытии города
                 setTimeout(() => {
                     const mapElement = cityDetails.querySelector('.city-branches-map');
                     if (mapElement && cityMaps[mapElement.id]) {
                         cityMaps[mapElement.id].container.fitToViewport();
+
+                        // Переустанавливаем границы карты при открытии
+                        setTimeout(() => {
+                            const map = cityMaps[mapElement.id];
+                            const geoObjects = map.geoObjects;
+                            if (geoObjects.getLength() > 0) {
+                                const bounds = geoObjects.getBounds();
+                                if (bounds) {
+                                    map.setBounds(bounds, {
+                                        checkZoomRange: true,
+                                        zoomMargin: 30
+                                    });
+                                }
+                            }
+                        }, 300);
                     }
                 }, 100);
             } else {
@@ -749,4 +796,3 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-{% endblock %}
